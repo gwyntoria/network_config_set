@@ -1,0 +1,31 @@
+# NAME: Game
+# POLICY: proxy
+# SOURCE: https://github.com/blackmatrix7/ios_rule_script/tree/master/rule/QuantumultX/Game
+# UPDATED: 2026-09-16
+# DOMAIN-SUFFIX: 19
+# TOTAL: 19
+payload:
+  # Steam - Store, Community & Services
+  - DOMAIN-SUFFIX,s.team
+  - DOMAIN-SUFFIX,steam-api.com
+  - DOMAIN-SUFFIX,steam-chat.com
+  - DOMAIN-SUFFIX,steam.tv
+  - DOMAIN-SUFFIX,steamcommunity.com
+  - DOMAIN-SUFFIX,steamdeck.com
+  - DOMAIN-SUFFIX,steamgames.com
+  - DOMAIN-SUFFIX,steampowered.com
+  - DOMAIN-SUFFIX,steamstat.us
+  - DOMAIN-SUFFIX,steamstatic.com
+  - DOMAIN-SUFFIX,valvesoftware.com
+
+  # Ubisoft - Connect, Account & Store
+  - DOMAIN-SUFFIX,ubi.com
+  - DOMAIN-SUFFIX,ubisoft.com
+  - DOMAIN-SUFFIX,ubisoftconnect.com
+  - DOMAIN-SUFFIX,uplay.com
+
+  # PlayStation - Network, Account & Store
+  - DOMAIN-SUFFIX,playstation.com
+  - DOMAIN-SUFFIX,playstation.net
+  - DOMAIN-SUFFIX,playstationnetwork.com
+  - DOMAIN-SUFFIX,sonyentertainmentnetwork.com
