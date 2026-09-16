@@ -73,7 +73,7 @@ https://raw.githubusercontent.com/gwyntoria/network_config_set/main/rules/quantu
 - 排除名称中含 `IPv6` 的订阅节点。
 - 创建 `US` 策略组，并让 TikTok、PayPal、Gemini 和 Anthropic 规则使用该组。
 - 创建 `OpenAI` 策略组，可在当前 profile 的普通代理组与 `US` 组之间选择。
-- 将广告 provider 指向 `REJECT`，添加国内服务直连规则和 Steam 代理规则。
+- 将广告 provider 指向 `REJECT`，将游戏直连和代理 provider 分别指向 `DIRECT` 与当前 profile 的代理组，并添加国内服务直连规则。
 - 补充微信与钉钉相关的 `fake-ip-filter`。
 
 常用配置集中在脚本开头：
@@ -82,7 +82,7 @@ https://raw.githubusercontent.com/gwyntoria/network_config_set/main/rules/quantu
 - `proxyPolicyCandidates`：profile 未命中时的代理组候选名称。
 - `proxyRegions`：地区识别、白名单筛选和排列顺序。
 - `excludedProxyNameRules`：节点名称黑名单。
-- `usRuleProviderNames` 与 `rejectRuleProviderNames`：provider 的分流策略。
+- `usRuleProviderNames`、`rejectRuleProviderNames`、`directRuleProviderNames` 与 `proxyRuleProviderNames`：provider 的分流策略。
 - `directRules` 与 `proxyRulePrefixes`：直接插入配置的自定义规则。
 - `fakeIpFilterRules`：追加到 `dns.fake-ip-filter` 的域名。
 
@@ -90,9 +90,11 @@ https://raw.githubusercontent.com/gwyntoria/network_config_set/main/rules/quantu
 
 ```text
 直连规则
+直连 provider 规则
 广告拦截规则
 OpenAI 规则
 美国节点组规则
+代理 provider 规则
 强制代理规则
 订阅原有规则
 ```

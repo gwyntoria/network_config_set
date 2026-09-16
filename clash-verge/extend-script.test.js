@@ -77,6 +77,22 @@ test("keeps exclusions separate from region recognition", () => {
   assert.deepEqual(Array.from(getGroup(config, "US").proxies), ["US-01"]);
 });
 
+test("routes game rule providers before subscription rules", () => {
+  const main = loadMain();
+  const config = makeConfig(["JP-01"]);
+
+  main(config, "UNKNOWN");
+
+  const gameDirectIndex = config.rules.indexOf("RULE-SET,GameDirect,DIRECT");
+  const gameProxyIndex = config.rules.indexOf("RULE-SET,GameProxy,Proxy");
+  const subscriptionRuleIndex = config.rules.indexOf("MATCH,DIRECT");
+
+  assert.notEqual(gameDirectIndex, -1);
+  assert.notEqual(gameProxyIndex, -1);
+  assert.ok(gameDirectIndex < gameProxyIndex);
+  assert.ok(gameProxyIndex < subscriptionRuleIndex);
+});
+
 test("is idempotent for managed groups, rules, and fake IP filters", () => {
   const main = loadMain();
   const config = makeConfig(["JP-01", "US-01"]);

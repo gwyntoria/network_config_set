@@ -11,14 +11,17 @@
  * - usRuleProviderNames：强制使用美国节点组的 rule-provider 名称，必须与合并配置中的名称完全一致。
  * - openAiProxyGroup：OpenAI 专用代理组，在当前 profile 的普通代理组和 US 之间手动选择。
  * - rejectRuleProviderNames：使用 REJECT 策略的 rule-provider 名称。
+ * - directRuleProviderNames：使用 DIRECT 策略的 rule-provider 名称。
+ * - proxyRuleProviderNames：使用当前 profile 代理策略的 rule-provider 名称。
  * - directRules：强制直连的完整 Mihomo 规则，每条规则必须包含末尾的 DIRECT。
  * - proxyRulePrefixes：强制代理的 Mihomo 规则前缀，不要填写末尾策略组，脚本会根据 profile 自动补上解析出的代理组名称。
  * - fakeIpFilterRules：追加到 dns.fake-ip-filter 的域名；通配符沿用 Mihomo 配置语法。
  *
- * 规则顺序为 directRules、rejectRuleProviderNames、OpenAI、
- * usRuleProviderNames、proxyRulePrefixes、订阅原规则，Mihomo 按首条匹配规则
- * 执行。节点筛选和排序只处理 config.proxies 中的真实订阅节点，DIRECT、REJECT
- * 以及其他代理组引用会保留在原位置。上述列表中的 name 仅用于标注，不参与匹配。
+ * 规则顺序为 directRules、directRuleProviderNames、rejectRuleProviderNames、
+ * OpenAI、usRuleProviderNames、proxyRuleProviderNames、proxyRulePrefixes、订阅原规则，
+ * Mihomo 按首条匹配规则执行。节点筛选和排序只处理 config.proxies 中的真实订阅节点，
+ * DIRECT、REJECT 以及其他代理组引用会保留在原位置。上述列表中的 name 仅用于标注，
+ * 不参与匹配。
  */
 
 // profile 名称 -> 代理组名称
@@ -123,17 +126,11 @@ const openAiProxyGroup = {
 
 const usRuleProviderNames = ["TikTok", "PayPal", "Gemini", "Anthropic"];
 const rejectRuleProviderNames = ["AD"];
+const directRuleProviderNames = ["GameDirect"];
+const proxyRuleProviderNames = ["GameProxy"];
 
 // 需要强制直连的规则放在这里，避免国内服务、办公软件和支付场景误走代理。
 const directRules = [
-  `DOMAIN-SUFFIX,epic.com,DIRECT`,
-  `DOMAIN-SUFFIX,caixin.com,DIRECT`,
-  `DOMAIN-SUFFIX,dedao.com,DIRECT`,
-  `DOMAIN-SUFFIX,alipay.com,DIRECT`,
-  `DOMAIN-SUFFIX,jd.com,DIRECT`,
-  `DOMAIN-SUFFIX,taobao.com,DIRECT`,
-  `DOMAIN-SUFFIX,linuxdo.org,DIRECT`,
-
   // --- 微信 / WeChat: Windows ---
   `PROCESS-NAME,Weixin.exe,DIRECT`,
   `PROCESS-NAME,WeChat.exe,DIRECT`,
@@ -168,24 +165,10 @@ const directRules = [
   `DOMAIN-SUFFIX,aliyuncs.com,DIRECT`,
   `DOMAIN-SUFFIX,mxhichina.com,DIRECT`,
   `DOMAIN-SUFFIX,mmstat.com,DIRECT`,
-
-  // --- 国内兜底 ---
-  `GEOSITE,cn,DIRECT`,
-  `GEOIP,CN,DIRECT,no-resolve`,
 ];
 
 // 需要强制走代理的规则放在这里，策略组统一使用当前 profile 解析出的 proxyPolicy。
 const proxyRulePrefixes = [
-  // --- Steam 核心域名 ---
-  "DOMAIN-SUFFIX,steampowered.com",
-  "DOMAIN-SUFFIX,steamcommunity.com",
-  "DOMAIN-SUFFIX,steamgames.com",
-  "DOMAIN-SUFFIX,steamstatic.com",
-  "DOMAIN-SUFFIX,steamserver.net",
-  "DOMAIN-SUFFIX,steam-chat.com",
-  "DOMAIN-SUFFIX,valvesoftware.com",
-  "DOMAIN-SUFFIX,valve.net",
-
   // --- 其他代理规则 ---
   // 示例："DOMAIN-SUFFIX,example.com"
 ];
@@ -213,6 +196,20 @@ function buildOpenAiProxyRules(config) {
 function buildRejectRules() {
   return rejectRuleProviderNames.map(
     (providerName) => `RULE-SET,${providerName},REJECT`,
+  );
+}
+
+function buildDirectRuleProviderRules() {
+  return directRuleProviderNames.map(
+    (providerName) => `RULE-SET,${providerName},DIRECT`,
+  );
+}
+
+function buildProxyRuleProviderRules(proxyPolicy) {
+  if (!proxyPolicy) return [];
+
+  return proxyRuleProviderNames.map(
+    (providerName) => `RULE-SET,${providerName},${proxyPolicy}`,
   );
 }
 
@@ -296,9 +293,11 @@ function mergeProxyRules(config, profileName) {
 
   config.rules = uniqueRules(
     directRules
+      .concat(buildDirectRuleProviderRules())
       .concat(buildRejectRules())
       .concat(buildOpenAiProxyRules(config))
       .concat(buildUsProxyRules(config))
+      .concat(buildProxyRuleProviderRules(proxyPolicy))
       .concat(proxyRules)
       .concat(oldRules),
   );
