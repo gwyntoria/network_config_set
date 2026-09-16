@@ -6,6 +6,20 @@ rule-providers:
     path: ./rules/AD.yaml
     interval: 86400
 
+  GameDirect:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/gwyntoria/network_config_set/refs/heads/main/rules/clash/game-direct.yaml"
+    path: ./rules/GameDirect.yaml
+    interval: 86400
+
+  GameProxy:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/gwyntoria/network_config_set/refs/heads/main/rules/clash/game-proxy.yaml"
+    path: ./rules/GameProxy.yaml
+    interval: 86400
+
   Gemini:
     type: http
     behavior: classical
