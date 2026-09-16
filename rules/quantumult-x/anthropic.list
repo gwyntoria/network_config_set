@@ -1,0 +1,17 @@
+# NAME: Anthropic / Claude
+# SOURCE: https://github.com/xiaolai/anthropic-claude-surge-rules-set
+# UPDATED: 2026-04-14
+
+HOST-SUFFIX,anthropic.com,proxy
+HOST-SUFFIX,claude.ai,proxy
+HOST-SUFFIX,claude.com,proxy
+HOST-SUFFIX,claudeusercontent.com,proxy
+HOST-SUFFIX,clau.de,proxy
+HOST-SUFFIX,modelcontextprotocol.io,proxy
+HOST,downloads.claude.ai,proxy
+HOST,storage.googleapis.com,proxy
+HOST,cdn.growthbook.io,proxy
+IP-CIDR,160.79.104.0/23,proxy,no-resolve
+IP-CIDR,160.79.104.0/21,proxy,no-resolve
+IP6-CIDR,2607:6bc0::/48,proxy,no-resolve
+HOST,cdn.usefathom.com,proxy
