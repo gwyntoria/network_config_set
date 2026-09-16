@@ -2,7 +2,7 @@ rule-providers:
   AD:
     type: http
     behavior: domain
-    url: "https://github.com/gwyntoria/network_config_set/raw/refs/heads/main/rules/clash/ad.yaml"
+    url: "https://raw.githubusercontent.com/gwyntoria/network_config_set/refs/heads/main/rules/clash/ad.yaml"
     path: ./rules/AD.yaml
     interval: 86400
 
