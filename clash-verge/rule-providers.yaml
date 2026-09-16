@@ -19,6 +19,13 @@ rule-providers:
     url: "https://raw.githubusercontent.com/gwyntoria/network_config_set/refs/heads/main/rules/clash/game-proxy.yaml"
     path: ./rules/GameProxy.yaml
     interval: 86400
+    
+  Anthropic:
+      type: http
+      behavior: classical
+      url: "https://raw.githubusercontent.com/gwyntoria/network_config_set/refs/heads/main/rules/clash/anthropic.yaml"
+      path: ./rules/Anthropic.yaml
+      interval: 86400
 
   Gemini:
     type: http
@@ -33,13 +40,6 @@ rule-providers:
     url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/OpenAI/OpenAI.yaml"
     path: ./rules/Openai.yaml
     interval: 86400
-    
-  Anthropic:
-      type: http
-      behavior: classical
-      url: https://raw.githubusercontent.com/xiaolai/anthropic-claude-surge-rules-set/main/dist/anthropic-clash.yaml
-      path: ./rules/anthropic.yaml
-      interval: 86400
 
   TikTok:
     type: http
