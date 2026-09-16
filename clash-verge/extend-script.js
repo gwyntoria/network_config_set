@@ -43,6 +43,13 @@ const proxyPolicyCandidates = [
 // 节点只归入第一个命中的地区；数组顺序同时决定 proxy group 中的地区优先级。
 const proxyRegions = [
   {
+    id: "HK",
+    name: "香港",
+    keywords: ["香港", "Hong Kong", "🇭🇰"],
+    codes: ["HK"],
+    included: true,
+  },
+  {
     id: "JP",
     name: "日本",
     keywords: ["日本", "Japan", "Tokyo", "Osaka", "🇯🇵"],
@@ -61,13 +68,6 @@ const proxyRegions = [
     name: "美国",
     keywords: ["美国", "美國", "United States", "America", "🇺🇸"],
     codes: ["US", "USA"],
-    included: true,
-  },
-  {
-    id: "HK",
-    name: "香港",
-    keywords: ["香港", "Hong Kong", "🇭🇰"],
-    codes: ["HK"],
     included: true,
   },
   {
