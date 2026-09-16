@@ -1,6 +1,7 @@
 # NAME: Anthropic / Claude
 # POLICY: proxy
-# SOURCE: https://github.com/xiaolai/anthropic-claude-surge-rules-set
+# SOURCE: https://github.com/gwyntoria/network_config_set/blob/main/rules/clash/anthropic.yaml
+# REFERENCE: https://github.com/xiaolai/anthropic-claude-surge-rules-set
 # UPDATED: 2026-04-14
 # DOMAIN: 4
 # DOMAIN-SUFFIX: 6
