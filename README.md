@@ -22,7 +22,7 @@
 | [ad.list](rules/quantumult-x/ad.list) | 广告拦截规则 |
 | [anthropic.list](rules/quantumult-x/anthropic.list) | Anthropic 代理规则 |
 | [game.list](rules/quantumult-x/game.list) | 游戏平台分流规则 |
-| [personality.list](rules/quantumult-x/personality.list) | 个人常用网站直连规则 |
+| [personality.list](rules/quantumult-x/personality.list) | 自用补充规则 |
 
 ### Clash Verge Rev 配置
 
