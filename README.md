@@ -125,8 +125,8 @@ node --test clash-verge/extend-script.test.js
 
 ## 规则来源
 
-各规则文件头部使用 `SOURCE` 记录本仓库中的文件地址，使用 `REFERENCE` 记录整理规则时参考的上游项目。
+各规则文件头部使用 `SOURCE` 记录本仓库中的文件地址，使用 `REFERENCE` 记录规则参考的上游项目。
 
-- 广告规则来自 `earoftoast/clash-rules`。
-- Anthropic 规则参考 `xiaolai/anthropic-claude-surge-rules-set`。
-- 游戏规则整理自 `blackmatrix7/ios_rule_script`。
+- 广告规则：[earoftoast/clash-rules](https://github.com/earoftoast/clash-rules)。
+- Anthropic 规则： [xiaolai/anthropic-claude-surge-rules-set](https://github.com/xiaolai/anthropic-claude-surge-rules-set)。
+- 游戏平台规则： [blackmatrix7/ios_rule_script](https://github.com/blackmatrix7/ios_rule_script)。
