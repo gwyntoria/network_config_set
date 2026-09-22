@@ -78,7 +78,7 @@ https://raw.githubusercontent.com/gwyntoria/network_config_set/main/rules/quantu
 
 当前拓展脚本会处理以下内容：
 
-- 按香港、日本、韩国、美国、台湾、新加坡的顺序筛选并排列订阅节点。
+- 按美、日、韩、台的顺序优先排列订阅节点，其余节点按原顺序保留在后面。
 - 排除名称中含 `IPv6` 的订阅节点。
 - 创建 `US` 策略组，并让 TikTok、PayPal、Gemini 和 Anthropic 规则使用该组。
 - 创建 `OpenAI` 策略组，可在当前 profile 的普通代理组与 `US` 组之间选择。并将 OpenAI 规则使用该策略组。
@@ -90,7 +90,7 @@ https://raw.githubusercontent.com/gwyntoria/network_config_set/main/rules/quantu
 
 - `profilePolicyMap`：profile 名称与代理组名称的对应关系。
 - `proxyPolicyCandidates`：profile 未命中时的代理组候选名称。
-- `proxyRegions`：地区识别、白名单筛选和排列顺序。
+- `proxyRegions`：地区识别和排列顺序，匹配的节点优先排列，其余节点保留原有顺序。
 - `excludedProxyNameRules`：节点名称黑名单。
 - `usRuleProviderNames`、`rejectRuleProviderNames`、`directRuleProviderNames` 与 `proxyRuleProviderNames`：provider 的分流策略。
 - `directRules` 与 `proxyRulePrefixes`：直接插入配置的自定义规则。
@@ -121,7 +121,7 @@ Mihomo 使用首条命中的规则，修改这些列表时需保留所需的优�
 node --test clash-verge/extend-script.test.js
 ```
 
-测试覆盖地区识别与稳定排序、白名单和黑名单组合，以及脚本重复运行后的幂等性。
+测试覆盖地区识别与稳定排序、未配置地区节点和代理组引用的保留、黑名单排除，以及脚本重复运行后的幂等性。
 
 ## 规则来源
 

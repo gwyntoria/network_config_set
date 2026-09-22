@@ -55,12 +55,35 @@ test("recognizes one region per node and sorts known regions stably", () => {
     "Tokyo-02",
     "US-02",
     "US-01",
+    "RUSSIA-01",
     "DIRECT",
   ]);
   assert.deepEqual(Array.from(getGroup(config, "US").proxies), [
     "US-02",
     "US-01",
   ]);
+});
+
+test("keeps unconfigured regions in order and preserves group references", () => {
+  const main = loadMain();
+  const names = ["DE-02", "US-01", "Unknown", "HK-01", "DE-01"];
+  const config = makeConfig(names);
+  getGroup(config, "Proxy").proxies = [
+    "DIRECT", "DE-02", "US-01", "Other", "Unknown", "HK-01", "DE-01", "REJECT",
+  ];
+  config["proxy-groups"].push({
+    name: "Other", type: "select", proxies: ["DE-02", "Unknown", "DE-01"],
+  });
+
+  main(config, "UNKNOWN");
+
+  assert.deepEqual(Array.from(getGroup(config, "Proxy").proxies), [
+    "DIRECT", "HK-01", "US-01", "Other", "DE-02", "Unknown", "DE-01", "REJECT",
+  ]);
+  assert.deepEqual(Array.from(getGroup(config, "Other").proxies), [
+    "DE-02", "Unknown", "DE-01",
+  ]);
+  assert.deepEqual(config.proxies.map((proxy) => proxy.name), names);
 });
 
 test("keeps exclusions separate from region recognition", () => {
