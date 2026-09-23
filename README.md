@@ -84,7 +84,6 @@ https://raw.githubusercontent.com/gwyntoria/network_config_set/main/rules/quantu
 - 创建 `OpenAI` 策略组，可在当前 profile 的普通代理组与 `US` 组之间选择。并将 OpenAI 规则使用该策略组。
 - 将广告 provider 指向 `REJECT`，将游戏直连和代理 provider 分别指向 `DIRECT` 与当前 profile 的代理组。
 - 添加国内服务直连规则。
-- 补充微信与钉钉相关的 `fake-ip-filter`。
 
 常用配置集中在脚本开头：
 
@@ -94,7 +93,6 @@ https://raw.githubusercontent.com/gwyntoria/network_config_set/main/rules/quantu
 - `excludedProxyNameRules`：节点名称黑名单。
 - `usRuleProviderNames`、`rejectRuleProviderNames`、`directRuleProviderNames` 与 `proxyRuleProviderNames`：provider 的分流策略。
 - `directRules` 与 `proxyRulePrefixes`：直接插入配置的自定义规则。
-- `fakeIpFilterRules`：追加到 `dns.fake-ip-filter` 的域名。
 
 脚本插入规则时采用以下顺序：
 

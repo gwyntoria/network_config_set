@@ -116,7 +116,7 @@ test("routes game rule providers before subscription rules", () => {
   assert.ok(gameProxyIndex < subscriptionRuleIndex);
 });
 
-test("is idempotent for managed groups, rules, and fake IP filters", () => {
+test("is idempotent for managed groups and rules", () => {
   const main = loadMain();
   const config = makeConfig(["JP-01", "US-01"]);
 
@@ -125,4 +125,20 @@ test("is idempotent for managed groups, rules, and fake IP filters", () => {
   main(config, "UNKNOWN");
 
   assert.equal(JSON.stringify(config), JSON.stringify(once));
+});
+
+test("leaves DNS settings unchanged", () => {
+  const main = loadMain();
+  const config = makeConfig(["JP-01"]);
+  config.dns = { "fake-ip-filter": ["example.com"] };
+  const dns = config.dns;
+
+  main(config, "UNKNOWN");
+
+  assert.equal(config.dns, dns);
+  assert.deepEqual(config.dns["fake-ip-filter"], ["example.com"]);
+
+  delete config.dns;
+  main(config, "UNKNOWN");
+  assert.equal(Object.hasOwn(config, "dns"), false);
 });

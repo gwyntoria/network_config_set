@@ -15,7 +15,6 @@
  * - proxyRuleProviderNames：使用当前 profile 代理策略的 rule-provider 名称。
  * - directRules：强制直连的完整 Mihomo 规则，每条规则必须包含末尾的 DIRECT。
  * - proxyRulePrefixes：强制代理的 Mihomo 规则前缀，不要填写末尾策略组，脚本会根据 profile 自动补上解析出的代理组名称。
- * - fakeIpFilterRules：追加到 dns.fake-ip-filter 的域名；通配符沿用 Mihomo 配置语法。
  *
  * 规则顺序为 directRules、directRuleProviderNames、rejectRuleProviderNames、
  * OpenAI、usRuleProviderNames、proxyRuleProviderNames、proxyRulePrefixes、订阅原规则，
@@ -201,16 +200,6 @@ function buildProxyRuleProviderRules(proxyPolicy) {
   );
 }
 
-const fakeIpFilterRules = [
-  "localhost.ptlogin2.qq.com",
-  "localhost.sec.qq.com",
-  "localhost.work.weixin.qq.com",
-  "*.weixin.qq.com",
-  "*.wechat.com",
-  "*.dingtalk.com",
-  "*.dingtalkapps.com",
-];
-
 function uniqueRules(rules) {
   const seen = new Set();
   const result = [];
@@ -288,25 +277,6 @@ function mergeProxyRules(config, profileName) {
       .concat(buildProxyRuleProviderRules(proxyPolicy))
       .concat(proxyRules)
       .concat(oldRules),
-  );
-}
-
-function ensureDns(config) {
-  config.dns = config.dns || {};
-
-  return config.dns;
-}
-
-function getOldFakeIpFilter(dns) {
-  return Array.isArray(dns["fake-ip-filter"]) ? dns["fake-ip-filter"] : [];
-}
-
-function mergeFakeIpFilter(config) {
-  const dns = ensureDns(config);
-  const oldFakeIpFilter = getOldFakeIpFilter(dns);
-
-  dns["fake-ip-filter"] = uniqueRules(
-    fakeIpFilterRules.concat(oldFakeIpFilter),
   );
 }
 
@@ -528,7 +498,5 @@ function main(config, profileName) {
   ensureOpenAiProxyGroup(config, profileName);
   filterAndSortProxyGroupProxies(config);
   mergeProxyRules(config, profileName);
-  mergeFakeIpFilter(config);
-
   return config;
 }
