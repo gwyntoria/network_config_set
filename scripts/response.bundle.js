@@ -3778,21 +3778,9 @@
     let n9 = {
       ADBlock: {
         Settings: {
-          Splash: !0,
-          Feed: {
-            AD: !0,
-            Activity: !1,
-            Vertical: !1,
-            BlockUpLiveList: "",
-            Story: !0,
-          },
-          Search: { AD: !0, HotSearch: !0 },
-          PGC: { AD: !0 },
-          Xlive: { AD: !0 },
+          Search: { AD: !0 },
           Dynamic: { AdCard: !0 },
           View: { AD: !0 },
-          DM: { Command: !1, Colorful: !1 },
-          Reply: { AD: !0 },
         },
       },
       Default: { Settings: { LogLevel: "WARN" } },
@@ -51218,305 +51206,6 @@
           case "text/vtt":
           case "application/vtt":
             break;
-          case "text/json":
-          case "application/json":
-            switch (((i = JSON.parse($response.body ?? "{}")), gl.hostname)) {
-              case "www.bilibili.com":
-                break;
-              case "app.bilibili.com":
-              case "app.biliapi.net":
-                switch (gl.pathname) {
-                  case "/x/v2/splash/show":
-                  case "/x/v2/splash/list":
-                  case "/x/v2/splash/brand/list":
-                  case "/x/v2/splash/event/list2":
-                    switch (e?.Splash) {
-                      case !0:
-                      default:
-                        eb.log("✅ 开屏页广告去除");
-                        i.data &&
-                          ["account", "event_list", "preload", "show"].forEach(
-                            (e) => {
-                              delete i.data[e];
-                            },
-                          );
-                        break;
-                      case !1:
-                        eb.warn("用户设置开屏页广告不去除");
-                    }
-                    break;
-                  case "/x/v2/feed/index":
-                    switch (e?.Feed?.AD) {
-                      case !0:
-                      default:
-                        async function a() {
-                          let e = ev.getItem("@BiliBili.Index.Caches"),
-                            t = {};
-                          if (e && e.length > 0)
-                            ((t = e.pop()), eb.log("✅ 推荐页空缺位填充成功"));
-                          else {
-                            let n = {
-                              url: $request.url,
-                              headers: $request.heders,
-                            };
-                            (await eT(n).then((e) => {
-                              try {
-                                let t = JSON.parse(e.body || "{}");
-                                t?.code === 0 && t?.message === "0"
-                                  ? ((t.data.items = t.data.items
-                                      .map((e) => {
-                                        let {
-                                          card_type: t,
-                                          card_goto: n,
-                                          goto: i,
-                                        } = e;
-                                        if (t && n) {
-                                          if (
-                                            "banner_v8" === t &&
-                                            "banner" === n
-                                          )
-                                            return;
-                                          if (
-                                            "cm_v2" === t &&
-                                            [
-                                              "ad_web_s",
-                                              "ad_av",
-                                              "ad_web_gif",
-                                              "ad_player",
-                                              "ad_inline_3d",
-                                              "ad_inline_eggs",
-                                              "ad_inline_live",
-                                            ].includes(n)
-                                          )
-                                            return;
-                                          else if (
-                                            "small_cover_v10" === t &&
-                                            "game" === n
-                                          )
-                                            return;
-                                          else if (
-                                            "cm_double_v9" === t &&
-                                            "ad_inline_av" === n
-                                          )
-                                            return;
-                                          else if (
-                                            "large_cover_v9" === t &&
-                                            "inline_av_v2" === n
-                                          )
-                                            return;
-                                          else if ("vertical_av" === i) return;
-                                        }
-                                        return e;
-                                      })
-                                      .filter((e) => void 0 !== e)),
-                                    ev.setItem(
-                                      "@BiliBili.Index.Caches",
-                                      t.data.items,
-                                    ),
-                                    eb.log("✅ 推荐页缓存数组补充成功"))
-                                  : eb.warn("访问推荐页尝试填补失败");
-                              } catch (t) {
-                                eb.error(t, e);
-                              }
-                            }),
-                              (e = ev.getItem("@BiliBili.Index.Caches"))
-                                .length > 0 &&
-                                ((t = e.pop()),
-                                eb.log("✅ 推荐页空缺位填充成功")));
-                          }
-                          return (ev.setItem("@BiliBili.Index.Caches", e), t);
-                        }
-                        i.data.items?.length &&
-                          ((i.data.items = await Promise.all(
-                            i.data.items.map(async (n) => {
-                              let { card_type: i, card_goto: r, goto: o } = n;
-                              if (i && r) {
-                                if (
-                                  ["banner_v8", "banner_ipad_v8"].includes(i) &&
-                                  "banner" === r
-                                ) {
-                                  if (e?.Feed?.Activity === !0) {
-                                    ((t.banner_hash = n.hash),
-                                      ev.setItem("@BiliBili.ADBlock.Caches", t),
-                                      eb.log("✅ 推荐页活动大图去除"));
-                                    return;
-                                  }
-                                  n.banner_item &&
-                                    (n.banner_item = n.banner_item.filter(
-                                      (e) =>
-                                        "ad" !== e.type ||
-                                        (eb.log("✅ 推荐页大图广告去除"), !1),
-                                    ));
-                                } else if (
-                                  ["cm_v2", "cm_v1"].includes(i) &&
-                                  ["ad_web_s", "ad_av", "ad_web_gif"].includes(
-                                    r,
-                                  )
-                                ) {
-                                  if (
-                                    (eb.log(`✅ ${r}广告去除`),
-                                    "phone" !== gl.searchParams.get("device"))
-                                  )
-                                    return;
-                                  await a().then((e) => (n = e));
-                                } else if (
-                                  "live" === r &&
-                                  "small_cover_v9" === i
-                                ) {
-                                  let t = e?.Feed?.BlockUpLiveList;
-                                  ("number" == typeof t && (t = t.toString()),
-                                    t?.includes(n?.args?.up_id?.toString()) &&
-                                      (eb.log(
-                                        `✅ 屏蔽Up主<${n?.args?.up_name}>直播推广`,
-                                      ),
-                                      await a().then((e) => (n = e))));
-                                } else if (
-                                  "cm_v2" === i &&
-                                  [
-                                    "ad_player",
-                                    "ad_inline_3d",
-                                    "ad_inline_eggs",
-                                    "ad_inline_live",
-                                  ].includes(r)
-                                ) {
-                                  eb.log(`✅ ${r}广告去除`);
-                                  return;
-                                } else if (
-                                  "small_cover_v10" === i &&
-                                  "game" === r
-                                ) {
-                                  if (
-                                    (eb.log("✅ 游戏广告去除"),
-                                    "phone" !== gl.searchParams.get("device"))
-                                  )
-                                    return;
-                                  await a().then((e) => (n = e));
-                                } else if (
-                                  "cm_double_v9" === i &&
-                                  "ad_inline_av" === r
-                                ) {
-                                  eb.log("✅ 大视频广告去除");
-                                  return;
-                                } else
-                                  "vertical_av" === o &&
-                                    (e?.Feed?.Vertical === !0
-                                      ? (eb.log("✅ 竖屏视频去除"),
-                                        await a().then((e) => (n = e)))
-                                      : eb.warn(
-                                          "用户设置推荐页竖屏视频不去除",
-                                        ));
-                              }
-                              return n;
-                            }),
-                          )),
-                          (i.data.items = i.data.items.filter(
-                            (e) => void 0 !== e,
-                          )));
-                        break;
-                      case !1:
-                        eb.warn("用户设置推荐页广告不去除");
-                    }
-                    break;
-                  case "/x/v2/feed/index/story":
-                    switch (e?.Feed?.Story) {
-                      case !0:
-                      default:
-                        i.data?.items &&
-                          (eb.log("✅ 首页短视频流广告去除"),
-                          (i.data.items = i.data.items.filter(
-                            (e) =>
-                              !(
-                                e.hasOwnProperty("ad_info") ||
-                                ["vertical_ad_av", "vertical_pgc"].includes(
-                                  e.card_goto,
-                                )
-                              ),
-                          )));
-                        break;
-                      case !1:
-                        eb.warn("用户设置首页短视频流广告不去除");
-                    }
-                    break;
-                  case "/x/v2/search/square":
-                    switch (e?.Search?.HotSearch) {
-                      case !0:
-                      default:
-                        (eb.log("✅ 搜索页热搜内容去除"),
-                          (i.data = i.data.filter(
-                            (e) => "trending" !== e.type,
-                          )));
-                        break;
-                      case !1:
-                        eb.warn("用户设置搜索页热搜内容不去除");
-                    }
-                }
-                break;
-              case "api.bilibili.com":
-              case "api.biliapi.net":
-                switch (gl.pathname) {
-                  case "/pgc/page/bangumi":
-                  case "/pgc/page/cinema/tab":
-                    switch (e?.PGC?.AD) {
-                      case !0:
-                      default:
-                        i.result?.modules &&
-                          (eb.log("✅ 观影页广告去除"),
-                          i.result.modules.forEach((e) => {
-                            e.style.startsWith("banner")
-                              ? (e.items = e.items.filter((e) =>
-                                  e.link.includes("play"),
-                                ))
-                              : e.style.startsWith("function")
-                                ? (e.items = e.items.filter((e) =>
-                                    e.blink.startsWith("bilibili"),
-                                  ))
-                                : [241, 1283, 1284, 1441].includes(e.module_id)
-                                  ? (e.items = [])
-                                  : e.style.startsWith("tip") && (e.items = []);
-                          }));
-                        break;
-                      case !1:
-                        eb.warn("用户设置观影页广告不去除");
-                    }
-                    break;
-                  case "/x/player/wbi/playurl":
-                    break;
-                  case "/x/web-interface/wbi/index/top/feed/rcmd":
-                    switch (e?.Feed?.AD) {
-                      case !0:
-                      default:
-                        (eb.log("✅ 首页广告内容去除"),
-                          (i.data.item = i.data.item.filter(
-                            (e) => "ad" !== e.goto,
-                          )));
-                        break;
-                      case !1:
-                        eb.warn("用户设置首页广告不去除");
-                    }
-                }
-                break;
-              case "api.live.bilibili.com":
-                if ("/xlive/app-room/v1/index/getInfoByRoom" === gl.pathname)
-                  switch (e?.Xlive?.AD) {
-                    case !0:
-                    default:
-                      (eb.log("✅ 直播banner广告去除"),
-                        delete i.data?.activity_banner_info,
-                        i.data?.shopping_info &&
-                          ((i.data.shopping_info = { is_show: 0 }),
-                          eb.log("✅ 直播购物广告去除")),
-                        i.data?.new_tab_info?.outer_list?.length > 0 &&
-                          (i.data.new_tab_info.outer_list =
-                            i.data.new_tab_info.outer_list.filter(
-                              (e) => 33 !== e.biz_id,
-                            )));
-                      break;
-                    case !1:
-                      eb.warn("用户设置直播页广告不去除");
-                  }
-            }
-            $response.body = JSON.stringify(i);
-            break;
           case "application/protobuf":
           case "application/x-protobuf":
           case "application/vnd.google.protobuf":
@@ -51539,20 +51228,6 @@
                   case "app.biliapi.net":
                   case "app.bilibili.com":
                     switch (gd?.[0]) {
-                      case "bilibili.app.playurl.v1.PlayURL":
-                        if (gd?.[1] === "PlayView") {
-                          i = af.fromBinary(t);
-                          let e = i.playArc?.backgroundPlayConf;
-                          (e && (!e.isSupport || e.disabled)
-                            ? (eb.log("✅ 后台播放限制去除"),
-                              (i.playArc.backgroundPlayConf.isSupport = !0),
-                              (i.playArc.backgroundPlayConf.disabled = !1),
-                              (i.playArc.backgroundPlayConf.extraContent =
-                                null))
-                            : eb.warn("无后台播放限制"),
-                            (t = af.toBinary(i)));
-                        }
-                        break;
                       case "bilibili.app.dynamic.v2.Dynamic":
                         switch (gd?.[1]) {
                           case "DynAll":
@@ -51582,7 +51257,7 @@
                             switch (e?.View?.AD) {
                               case !0:
                               default:
-                                for (let e in ((i = a5.fromBinary(t)),
+                                ((i = a5.fromBinary(t)),
                                 i.cms?.length &&
                                   (eb.log("✅ 播放页广告卡片去除"),
                                   (i.cms = [])),
@@ -51595,9 +51270,7 @@
                                 (i.cmConfig || i.cmIpad) &&
                                   (eb.log("✅ 播放页定制tab去除"),
                                   (i.cmConfig = void 0),
-                                  (i.cmIpad = void 0)),
-                                i.tIcon))
-                                  null === i.tIcon[e] && delete i.tIcon[e];
+                                  (i.cmIpad = void 0)));
                                 t = a5.toBinary(i);
                                 break;
                               case !1:
@@ -51673,44 +51346,6 @@
                               (t = oY.toBinary(i)));
                         }
                         break;
-                      case "bilibili.app.interface.v1.Teenagers":
-                        if (gd?.[1] === "ModeStatus")
-                          (((i = o9.fromBinary(t)).modes = i.modes.map(
-                            (e) => (
-                              e?.name === "teenagers" &&
-                                e?.f5?.f1 &&
-                                ((e.f5.f1 = 0),
-                                eb.log("✅ 青少年模式弹窗去除")),
-                              e
-                            ),
-                          )),
-                            (t = o9.toBinary(i)));
-                        break;
-                      case "bilibili.community.service.dm.v1.DM":
-                        switch (gd?.[1]) {
-                          case "DmView":
-                            if (((i = sW.fromBinary(t)), e?.DM?.Command === !0))
-                              (eb.log("✅ 交互式弹幕去除"),
-                                ey.set(i, "dmView.commandDms", []));
-                            else eb.warn("用户设置交互式弹幕不去除");
-                            (i.activityMeta.length &&
-                              (eb.log("✅ 雲視聽水印去除"),
-                              (i.activityMeta = [])),
-                              (t = sW.toBinary(i)));
-                            break;
-                          case "DmSegMobile":
-                            if (e?.DM?.Colorful === !0)
-                              (((i = sD.fromBinary(t)).elems = i.elems.map(
-                                (e) => (
-                                  e?.colorful === 60001 && (e.colorful = 0),
-                                  e
-                                ),
-                              )),
-                                eb.log("✅ 会员弹幕已替换为普通弹幕"),
-                                (t = sD.toBinary(i)));
-                            else eb.warn("用户设置会员弹幕不修改");
-                        }
-                        break;
                       case "bilibili.main.community.reply.v1.Reply":
                         if (gd?.[1] === "MainList")
                           switch (e?.Reply?.AD) {
@@ -51731,11 +51366,6 @@
                               eb.log("✅ 用户设置评论列表广告不去除");
                           }
                         break;
-                      case "bilibili.pgc.gateway.player.v2.PlayURL":
-                      case "bilibili.app.nativeact.v1.NativeAct":
-                      case "bilibili.app.interface.v1.Search":
-                        gd?.[1];
-                        break;
                       case "bilibili.polymer.app.search.v1.Search":
                         if (gd?.[1] === "SearchAll")
                           switch (e?.Search?.AD) {
@@ -51744,11 +51374,7 @@
                               ((i = cc.fromBinary(t)),
                                 eb.log("✅ 搜索页广告去除"),
                                 (i.item = i.item.filter(
-                                  (e) =>
-                                    !(
-                                      e.cardItem?.oneofKind === "cm" ||
-                                      e.cardItem?.oneofKind === "game"
-                                    ),
+                                  (e) => e.cardItem?.oneofKind !== "cm",
                                 )),
                                 (t = cc.toBinary(i)));
                               break;

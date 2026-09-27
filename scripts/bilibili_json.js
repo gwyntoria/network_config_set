@@ -9,176 +9,108 @@
 > 特别提醒：如需转载请注明出处，谢谢合作！
 ***********************************************/
 
-const version = "V2.0.122";
-
 let body = $response.body;
+
+function isAd(item) {
+  if (!item || typeof item !== "object") return false;
+  const goto = item.card_goto;
+  return (
+    Object.prototype.hasOwnProperty.call(item, "ad_info") ||
+    item.type === "ad" ||
+    goto === "ad" ||
+    (typeof goto === "string" && goto.startsWith("ad_"))
+  );
+}
+
 if (body) {
-  switch (!0) {
-    case /pgc\/season\/app\/related\/recommend\?/.test($request.url):
-      try {
-        let a = JSON.parse(body);
-        (a.result?.cards?.length &&
-          (a.result.cards = a.result.cards.filter((a) => 2 != a.type)),
-          (body = JSON.stringify(a)));
-      } catch (a) {
-        console.log(`bilibili recommend:` + a);
+  try {
+    const response = JSON.parse(body);
+    let changed = false;
+
+    if (/^https:\/\/app\.bilibili\.com\/x\/v2\/splash\/list(?:\?|$)/.test($request.url)) {
+      if (Array.isArray(response.data?.list)) {
+        for (const ad of response.data.list) {
+          ad.duration = 0;
+          ad.begin_time = 2240150400;
+          ad.end_time = 2240150400;
+          changed = true;
+        }
       }
-      break;
-    case /^https:\/\/app\.bilibili\.com\/x\/v2\/feed\/index\?/.test(
-      $request.url,
-    ):
-      try {
-        let a = JSON.parse(body),
-          b = [];
-        for (let c of a.data.items)
-          if (c.hasOwnProperty("banner_item")) continue;
-          else if (
-            !c.hasOwnProperty("ad_info") &&
-            c.card_goto !== "ad" &&
-            !c.card_goto?.startsWith("ad_")
-          )
-            b.push(c);
-          else continue;
-        ((a.data.items = b), (body = JSON.stringify(a)));
-      } catch (a) {
-        console.log(`bilibili index:` + a);
+    } else if (/\/pgc\/season\/app\/related\/recommend\?/.test($request.url)) {
+      if (Array.isArray(response.result?.cards)) {
+        const cards = response.result.cards.filter((card) => card.type !== 2);
+        if (cards.length !== response.result.cards.length) {
+          response.result.cards = cards;
+          changed = true;
+        }
       }
-      break;
-    case /^https?:\/\/app\.bilibili\.com\/x\/v2\/feed\/index\/story\?/.test(
-      $request.url,
-    ):
-      try {
-        let a = JSON.parse(body),
-          b = [];
-        for (let c of a.data.items)
-          c.hasOwnProperty("ad_info") ||
-            c.card_goto === "ad" ||
-            c.card_goto?.startsWith("ad_") ||
-            b.push(c);
-        ((a.data.items = b), (body = JSON.stringify(a)));
-      } catch (a) {
-        console.log(`bilibili Story:` + a);
+    } else if (/\/ecommerce-user\/get_shopping_info\?/.test($request.url)) {
+      if (response.data) {
+        response.data = {
+          shopping_card_detail: {},
+          bubbles_detail: {},
+          recommend_card_detail: {},
+          selected_goods: {},
+          h5jump_popup: [],
+        };
+        changed = true;
       }
-      break;
-    case /^https?:\/\/app\.bilibili\.com\/x\/v2\/account\/mine/.test(
-      $request.url,
-    ):
-      try {
-        let a = JSON.parse(body);
-        let changed = false;
-        a.data?.sections_v2?.forEach((section) => {
-          if (Array.isArray(section.items)) {
-            const items = section.items.filter(
-              (item) =>
-                item.id !== 622 &&
-                item.title !== "会员购" &&
-                item.title !== "會員購" &&
-                !item.uri?.startsWith("bilibili://mall/"),
-            );
-            if (items.length !== section.items.length) {
-              section.items = items;
+    } else if (/\/xlive\/app-room\/v1\/index\/getInfoByRoom(?:\?|$)/.test($request.url)) {
+      if (response.data?.shopping_info) {
+        response.data.shopping_info = { is_show: 0 };
+        changed = true;
+      }
+      if (Array.isArray(response.data?.new_tab_info?.outer_list)) {
+        const tabs = response.data.new_tab_info.outer_list.filter(
+          (tab) => tab.biz_id !== 33,
+        );
+        if (tabs.length !== response.data.new_tab_info.outer_list.length) {
+          response.data.new_tab_info.outer_list = tabs;
+          changed = true;
+        }
+      }
+    } else if (/^https?:\/\/app\.bilibili\.com\/x\/v2\/account\/mine(?:\?|$)/.test($request.url)) {
+      response.data?.sections_v2?.forEach((section) => {
+        if (!Array.isArray(section.items)) return;
+        const items = section.items.filter(
+          (item) =>
+            item.id !== 622 &&
+            item.title !== "会员购" &&
+            item.title !== "會員購" &&
+            !item.uri?.startsWith("bilibili://mall/"),
+        );
+        if (items.length !== section.items.length) {
+          section.items = items;
+          changed = true;
+        }
+      });
+    } else if (/^https?:\/\/app\.bilibili\.com\/x\/v2\/feed\/index(?:\/story)?(?:\?|$)/.test($request.url)) {
+      if (Array.isArray(response.data?.items)) {
+        const items = [];
+        for (const item of response.data.items) {
+          if (isAd(item)) {
+            changed = true;
+            continue;
+          }
+          if (Array.isArray(item?.banner_item)) {
+            const banner = item.banner_item.filter((entry) => !isAd(entry));
+            if (banner.length !== item.banner_item.length) {
               changed = true;
+              if (banner.length === 0) continue;
+              items.push({ ...item, banner_item: banner });
+              continue;
             }
           }
-        });
-        if (changed) body = JSON.stringify(a);
-      } catch (a) {
-        console.log(`bilibili mypage:` + a);
+          items.push(item);
+        }
+        if (changed) response.data.items = items;
       }
-      break;
-    case /^https?:\/\/api\.live\.bilibili\.com\/xlive\/app-room\/v1\/index\/getInfoByRoom/.test(
-      $request.url,
-    ):
-      try {
-        let a = JSON.parse(body);
-        ((a.data.activity_banner_info = null),
-          a.data?.shopping_info && (a.data.shopping_info = { is_show: 0 }),
-          a.data?.new_tab_info?.outer_list &&
-            a.data.new_tab_info.outer_list.length &&
-            (a.data.new_tab_info.outer_list =
-              a.data.new_tab_info.outer_list.filter((a) => 33 != a.biz_id)),
-          (body = JSON.stringify(a)));
-      } catch (a) {
-        console.log(`bilibili live broadcast:` + a);
-      }
-      break;
-    case /^https?:\/\/app\.bilibili\.com\/x\/resource\/top\/activity/.test(
-      $request.url,
-    ):
-      try {
-        let a = JSON.parse(body);
-        (a.data && ((a.data.hash = "ddgksf2013"), (a.data.online.icon = "")),
-          (body = JSON.stringify(a)));
-      } catch (a) {
-        console.log(`bilibili right corner:` + a);
-      }
-      break;
-    case /ecommerce-user\/get_shopping_info\?/.test($request.url):
-      try {
-        let a = JSON.parse(body);
-        (a.data &&
-          (a.data = {
-            shopping_card_detail: {},
-            bubbles_detail: {},
-            recommend_card_detail: {},
-            selected_goods: {},
-            h5jump_popup: [],
-          }),
-          (body = JSON.stringify(a)));
-      } catch (a) {
-        console.log(`bilibili shopping info:` + a);
-      }
-      break;
-    case /pgc\/page\/(bangumi|cinema\/tab\?)/.test($request.url):
-      try {
-        let a = JSON.parse(body);
-        (a.result.modules.forEach((a) => {
-          (a.style.startsWith("banner") &&
-            (a.items = a.items.filter((a) => -1 != a.link.indexOf("play"))),
-            a.style.startsWith("function") &&
-              ((a.items = a.items.filter(
-                (a) => -1 == a.blink.indexOf("bilibili.com"),
-              )),
-              [1283, 241, 1441, 1284].includes(a.module_id) && (a.items = [])),
-            a.style.startsWith("tip") && (a.items = []));
-        }),
-          (body = JSON.stringify(a)));
-      } catch (a) {
-        console.log(`bilibili fanju:` + a);
-      }
-      break;
-    case /^https:\/\/app\.bilibili\.com\/x\/v2\/splash\/list/.test(
-      $request.url,
-    ):
-      try {
-        let a = JSON.parse(body);
-        if (a.data && a.data.list)
-          for (let b of a.data.list)
-            ((b.duration = 0),
-              (b.begin_time = 2240150400),
-              (b.end_time = 2240150400));
-        body = JSON.stringify(a);
-      } catch (a) {
-        console.log(`bilibili openad:` + a);
-      }
-      break;
-    case /^https:\/\/api\.live\.bilibili\.com\/xlive\/app-interface\/v2\/index\/feed/.test(
-      $request.url,
-    ):
-      try {
-        let a = JSON.parse(body);
-        (a.data &&
-          a.data.card_list &&
-          (a.data.card_list = a.data.card_list.filter(
-            (a) => "banner_v1" != a.card_type,
-          )),
-          (body = JSON.stringify(a)));
-      } catch (a) {
-        console.log(`bilibili xlive:` + a);
-      }
-      break;
-    default:
-      $done({});
+    }
+
+    if (changed) body = JSON.stringify(response);
+  } catch (error) {
+    console.log("bilibili adblock: " + error);
   }
-  $done({ body });
-} else $done({});
+}
+
+$done({ body });
