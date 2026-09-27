@@ -3789,7 +3789,7 @@
           Search: { AD: !0, HotSearch: !0 },
           PGC: { AD: !0 },
           Xlive: { AD: !0 },
-          Dynamic: { HotTopics: !0, MostVisited: !1, AdCard: !0 },
+          Dynamic: { AdCard: !0 },
           View: { AD: !0 },
           DM: { Command: !1, Colorful: !1 },
           Reply: { AD: !0 },
@@ -51556,21 +51556,7 @@
                       case "bilibili.app.dynamic.v2.Dynamic":
                         switch (gd?.[1]) {
                           case "DynAll":
-                            switch (
-                              ((i = aK.fromBinary(t)), e?.Dynamic?.HotTopics)
-                            ) {
-                              case !0:
-                              default:
-                                (eb.log("✅ 动态综合页热门话题去除"),
-                                  (i.topicList = void 0));
-                                break;
-                              case !1:
-                                eb.warn("用户设置动态综合页热门话题不去除");
-                            }
-                            if (e?.Dynamic?.MostVisited === !0)
-                              (eb.log("✅ 动态综合页最常访问去除"),
-                                (i.upList = void 0));
-                            else eb.warn("用户设置动态综合页最常访问不去除");
+                            i = aK.fromBinary(t);
                             switch (e?.Dynamic?.AdCard) {
                               case !0:
                               default:
@@ -51588,15 +51574,6 @@
                             }
                             t = aK.toBinary(i);
                             break;
-                          case "DynVideo":
-                            if (
-                              ((i = az.fromBinary(t)),
-                              e?.Dynamic?.MostVisited === !0)
-                            )
-                              (eb.log("✅ 动态视频页最常访问去除"),
-                                (i.videoUpList = void 0));
-                            else eb.warn("用户设置动态视频页最常访问不去除");
-                            t = az.toBinary(i);
                         }
                         break;
                       case "bilibili.app.view.v1.View":
