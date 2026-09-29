@@ -15,6 +15,8 @@
  * - proxyRuleProviderNames：使用当前 profile 代理策略的 rule-provider 名称。
  * - directRules：强制直连的完整 Mihomo 规则，每条规则必须包含末尾的 DIRECT。
  * - proxyRulePrefixes：强制代理的 Mihomo 规则前缀，不要填写末尾策略组，脚本会根据 profile 自动补上解析出的代理组名称。
+ * - dnsOverrides：强制写入的 Mihomo DNS 配置，修正订阅自带的境外 DoH fallback
+ *   导致境外域名解析停滞、以及缺少 proxy-server-nameserver 导致节点域名解析失败的问题。
  *
  * 规则顺序为 directRules、directRuleProviderNames、rejectRuleProviderNames、
  * OpenAI、usRuleProviderNames、proxyRuleProviderNames、proxyRulePrefixes、订阅原规则，
@@ -103,6 +105,44 @@ const usProxyGroup = {
 const openAiProxyGroup = {
   name: "OpenAI",
   type: "select",
+};
+
+// 强制写入 Mihomo 的 DNS 配置，整体替换订阅自带或 GUI「DNS 覆写」中的对应字段。
+// 目的：
+// 1. 统一使用国内 DoH：订阅自带的 fallback（1.1.1.1 / 8.8.8.8 / dns.google）在国内
+//    直连不可达，会让每个境外域名解析等待约 5 秒，网页明显变慢；
+// 2. 显式配置 proxy-server-nameserver：保证节点服务器域名走干净通道解析，
+//    避免节点拨号超时（美国等节点失效的根因）；
+// 3. 固定 fake-ip 模式：代理流量按域名分流，不依赖本地解析结果。
+// 注意：使用脚本后建议关闭 GUI 的「DNS 覆写」；若保留，请保持两边配置一致。
+const dnsOverrides = {
+  "enable": true,
+  "enhanced-mode": "fake-ip",
+  "fake-ip-range": "198.18.0.1/16",
+  "listen": ":53",
+  "fake-ip-filter": [
+    "*.lan",
+    "*.local",
+    "*.arpa",
+    "time.*.com",
+    "ntp.*.com",
+    "+.market.xiaomi.com",
+    "localhost.ptlogin2.qq.com",
+    "*.msftncsi.com",
+    "www.msftconnecttest.com",
+  ],
+  "nameserver": [
+    "https://doh.pub/dns-query",
+    "https://dns.alidns.com/dns-query",
+  ],
+  "proxy-server-nameserver": [
+    "https://doh.pub/dns-query",
+    "https://dns.alidns.com/dns-query",
+  ],
+  "fallback": [
+    "https://doh.pub/dns-query",
+    "https://dns.alidns.com/dns-query",
+  ],
 };
 
 const directRuleProviderNames = ["GameDirect"];
@@ -487,7 +527,16 @@ function filterAndSortProxyGroupProxies(config) {
   }
 }
 
+function applyDnsOverrides(config) {
+  const currentDns =
+    config.dns && typeof config.dns === "object" ? config.dns : {};
+
+  // 数组字段整体替换，确保订阅自带的境外 DoH 不会残留。
+  config.dns = { ...currentDns, ...dnsOverrides };
+}
+
 function main(config, profileName) {
+  applyDnsOverrides(config);
   ensureUsProxyGroup(config);
   ensureOpenAiProxyGroup(config, profileName);
   filterAndSortProxyGroupProxies(config);
