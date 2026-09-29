@@ -45,6 +45,12 @@ const proxyPolicyCandidates = [
 // 节点只归入第一个命中的地区；数组顺序同时决定 proxy group 中的地区优先级。
 const proxyRegions = [
   {
+    id: "HK",
+    name: "香港",
+    keywords: ["香港", "Hong Kong", "🇭🇰"],
+    codes: ["HK"],
+  },
+  {
     id: "US",
     name: "美国",
     keywords: ["美国", "美國", "United States", "America", "🇺🇸"],
@@ -61,18 +67,6 @@ const proxyRegions = [
     name: "韩国",
     keywords: ["韩国", "韓國", "South Korea", "Korea", "Seoul", "🇰🇷"],
     codes: ["KR"],
-  },
-  {
-    id: "TW",
-    name: "台湾",
-    keywords: ["台湾", "台灣", "Taiwan"],
-    codes: ["TW"],
-  },
-  {
-    id: "HK",
-    name: "香港",
-    keywords: ["香港", "Hong Kong", "🇭🇰"],
-    codes: ["HK"],
   },
 ];
 
@@ -111,9 +105,9 @@ const openAiProxyGroup = {
   type: "select",
 };
 
-const usRuleProviderNames = ["TikTok", "PayPal", "Gemini", "Anthropic"];
-const rejectRuleProviderNames = ["AD"];
 const directRuleProviderNames = ["GameDirect"];
+const rejectRuleProviderNames = ["AD"];
+const usRuleProviderNames = ["TikTok", "PayPal", "Gemini", "Anthropic"];
 const proxyRuleProviderNames = ["GameProxy"];
 
 // 需要强制直连的规则放在这里，避免国内服务、办公软件和支付场景误走代理。
