@@ -50,16 +50,17 @@ test("recognizes one region per node and sorts known regions stably", () => {
   main(config, "UNKNOWN");
 
   assert.deepEqual(Array.from(getGroup(config, "Proxy").proxies), [
-    "japan-01",
-    "JP-US Relay",
-    "Tokyo-02",
     "US-02",
+    "JP-US Relay",
     "US-01",
+    "japan-01",
+    "Tokyo-02",
     "RUSSIA-01",
     "DIRECT",
   ]);
   assert.deepEqual(Array.from(getGroup(config, "US").proxies), [
     "US-02",
+    "JP-US Relay",
     "US-01",
   ]);
 });
@@ -93,8 +94,8 @@ test("keeps exclusions separate from region recognition", () => {
   main(config, "UNKNOWN");
 
   assert.deepEqual(Array.from(getGroup(config, "Proxy").proxies), [
-    "JP-01",
     "US-01",
+    "JP-01",
     "DIRECT",
   ]);
   assert.deepEqual(Array.from(getGroup(config, "US").proxies), ["US-01"]);
@@ -127,18 +128,51 @@ test("is idempotent for managed groups and rules", () => {
   assert.equal(JSON.stringify(config), JSON.stringify(once));
 });
 
-test("leaves DNS settings unchanged", () => {
+test("overrides managed DNS settings and preserves other fields", () => {
   const main = loadMain();
   const config = makeConfig(["JP-01"]);
-  config.dns = { "fake-ip-filter": ["example.com"] };
-  const dns = config.dns;
+  config.dns = {
+    enable: false,
+    "enhanced-mode": "redir-host",
+    "fake-ip-range": "198.19.0.1/16",
+    listen: "127.0.0.1:5353",
+    "fake-ip-filter": ["example.com"],
+    nameserver: ["https://1.1.1.1/dns-query"],
+    "proxy-server-nameserver": ["system"],
+    fallback: ["https://dns.google/dns-query"],
+    ipv6: false,
+  };
+  const expectedDns = {
+    enable: true,
+    "enhanced-mode": "fake-ip",
+    "fake-ip-range": "198.18.0.1/16",
+    listen: ":53",
+    "fake-ip-filter": [
+      "*.lan",
+      "*.local",
+      "*.arpa",
+      "time.*.com",
+      "ntp.*.com",
+      "+.market.xiaomi.com",
+      "localhost.ptlogin2.qq.com",
+      "*.msftncsi.com",
+      "www.msftconnecttest.com",
+    ],
+    nameserver: ["https://doh.pub/dns-query", "https://dns.alidns.com/dns-query"],
+    "proxy-server-nameserver": [
+      "https://doh.pub/dns-query", "https://dns.alidns.com/dns-query",
+    ],
+    fallback: ["https://doh.pub/dns-query", "https://dns.alidns.com/dns-query"],
+  };
 
   main(config, "UNKNOWN");
 
-  assert.equal(config.dns, dns);
-  assert.deepEqual(config.dns["fake-ip-filter"], ["example.com"]);
+  assert.deepEqual(JSON.parse(JSON.stringify(config.dns)), {
+    ...expectedDns,
+    ipv6: false,
+  });
 
   delete config.dns;
   main(config, "UNKNOWN");
-  assert.equal(Object.hasOwn(config, "dns"), false);
+  assert.deepEqual(JSON.parse(JSON.stringify(config.dns)), expectedDns);
 });
