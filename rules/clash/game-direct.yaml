@@ -1,50 +1,44 @@
 # NAME: Game
 # POLICY: direct
 # SOURCE: https://github.com/gwyntoria/network_config_set/blob/main/rules/clash/game-direct.yaml
-# REFERENCE: https://github.com/blackmatrix7/ios_rule_script/tree/master/rule/QuantumultX/Game
-# UPDATED: 2026-09-16
+# UPDATED: 2026-10-24
 # DOMAIN: 13
-# DOMAIN-SUFFIX: 21
-# TOTAL: 34
+# DOMAIN-SUFFIX: 10
+# TOTAL: 23
 payload:
-  # Steam - Downloads
+  # Steam China - Platform
   - DOMAIN,csgo.wmsj.cn
+  - DOMAIN,dota2.wmsj.cn
+  - DOMAIN,wmsjsteam.com
+  - DOMAIN-SUFFIX,steamchina.com
+
+  # Steam China - Download CDN
   - DOMAIN,dl.steam.clngaa.com
   - DOMAIN,dl.steam.ksyna.com
-  - DOMAIN,dota2.wmsj.cn
   - DOMAIN,st.dl.bscstorage.net
   - DOMAIN,st.dl.eccdnx.com
   - DOMAIN,st.dl.pinyuncloud.com
   - DOMAIN,steampipe.steamcontent.tnkjmec.com
   - DOMAIN,steampowered.com.8686c.com
   - DOMAIN,steamstatic.com.8686c.com
-  - DOMAIN,wmsjsteam.com
   - DOMAIN,xz.pphimalayanrt.com
+
+  # Steam - Content & Download CDN
   - DOMAIN-SUFFIX,cm.steampowered.com
-  - DOMAIN-SUFFIX,steamchina.com
   - DOMAIN-SUFFIX,steamcontent.com
   - DOMAIN-SUFFIX,steamserver.net
+
+  # Steam - Static & User Content CDN
+  - DOMAIN-SUFFIX,steamcdn-a.akamaihd.net
   - DOMAIN-SUFFIX,steamusercontent.com
 
-  # Epic Games
-  - DOMAIN-SUFFIX,battlebreakers.com
+  # Epic Games - Anti-Cheat
   - DOMAIN-SUFFIX,eac-cdn.com
   - DOMAIN-SUFFIX,easy.ac
   - DOMAIN-SUFFIX,easyanticheat.net
-  - DOMAIN-SUFFIX,epicgames.com
-  - DOMAIN-SUFFIX,epicgames.dev
-  - DOMAIN-SUFFIX,fortnite.com
-  - DOMAIN-SUFFIX,helpshift.com
-  - DOMAIN-SUFFIX,paragon.com
-  - DOMAIN-SUFFIX,playparagon.com
-  - DOMAIN-SUFFIX,roborecall.com
-  - DOMAIN-SUFFIX,shadowcomplex.com
-  - DOMAIN-SUFFIX,spyjinx.com
-  - DOMAIN-SUFFIX,unrealengine.com
-  - DOMAIN-SUFFIX,unrealtournament.com
 
-  # Ubisoft - Downloads
+  # Ubisoft - Download CDN
   - DOMAIN,uplaypc-s-ubisoft.cdn.ubi.com
 
-  # PlayStation - Downloads
+  # PlayStation - Download CDN
   - DOMAIN-SUFFIX,dl.playstation.net
