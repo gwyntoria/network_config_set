@@ -19,13 +19,21 @@ HOST,steampowered.com.8686c.com,direct
 HOST,steamstatic.com.8686c.com,direct
 HOST,xz.pphimalayanrt.com,direct
 
+# Steam - 下载协商与控制通道
+HOST-SUFFIX,api.steampowered.com,direct
+HOST-SUFFIX,cdn.steampowered.com,direct
+HOST-SUFFIX,client-download.steampowered.com,direct
+HOST-SUFFIX,media.steampowered.com,direct
+
 # Steam - Content & Download CDN
 HOST-SUFFIX,cm.steampowered.com,direct
 HOST-SUFFIX,steamcontent.com,direct
+HOST-SUFFIX,steamcontent.net,direct
 HOST-SUFFIX,steamserver.net,direct
 
 # Steam - Static & User Content CDN
 HOST-SUFFIX,steamcdn-a.akamaihd.net,direct
+HOST-SUFFIX,steamstatic.com,direct
 HOST-SUFFIX,steamusercontent.com,direct
 
 # Epic Games - Anti-Cheat
@@ -43,15 +51,12 @@ HOST-SUFFIX,dl.playstation.net,direct
 HOST-SUFFIX,s.team,proxy
 HOST-SUFFIX,steamdeck.com,proxy
 HOST-SUFFIX,steamgames.com,proxy
-HOST-SUFFIX,steampowered.com,proxy
 HOST-SUFFIX,steamstat.us,proxy
 
 # Steam - Community & Chat
 HOST-SUFFIX,steam-chat.com,proxy
+HOST-SUFFIX,steamcommunity-a.akamaihd.net,proxy
 HOST-SUFFIX,steamcommunity.com,proxy
-
-# Steam - Static Assets
-HOST-SUFFIX,steamstatic.com,proxy
 
 # Steam - API & Streaming
 HOST-SUFFIX,steam-api.com,proxy
