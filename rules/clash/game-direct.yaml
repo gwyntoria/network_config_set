@@ -3,8 +3,8 @@
 # SOURCE: https://github.com/gwyntoria/network_config_set/blob/main/rules/clash/game-direct.yaml
 # UPDATED: 2026-10-24
 # DOMAIN: 13
-# DOMAIN-SUFFIX: 10
-# TOTAL: 23
+# DOMAIN-SUFFIX: 16
+# TOTAL: 29
 payload:
   # Steam China - Platform
   - DOMAIN,csgo.wmsj.cn
@@ -23,13 +23,21 @@ payload:
   - DOMAIN,steamstatic.com.8686c.com
   - DOMAIN,xz.pphimalayanrt.com
 
+  # Steam - 下载协商与控制通道
+  - DOMAIN-SUFFIX,api.steampowered.com
+  - DOMAIN-SUFFIX,cdn.steampowered.com
+  - DOMAIN-SUFFIX,client-download.steampowered.com
+  - DOMAIN-SUFFIX,media.steampowered.com
+
   # Steam - Content & Download CDN
   - DOMAIN-SUFFIX,cm.steampowered.com
   - DOMAIN-SUFFIX,steamcontent.com
+  - DOMAIN-SUFFIX,steamcontent.net
   - DOMAIN-SUFFIX,steamserver.net
 
   # Steam - Static & User Content CDN
   - DOMAIN-SUFFIX,steamcdn-a.akamaihd.net
+  - DOMAIN-SUFFIX,steamstatic.com
   - DOMAIN-SUFFIX,steamusercontent.com
 
   # Epic Games - Anti-Cheat
