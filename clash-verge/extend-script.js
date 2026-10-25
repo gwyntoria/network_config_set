@@ -7,6 +7,7 @@
  * - proxyPolicyCandidates：映射未命中时使用的代理组候选名称，越靠前越优先。
  * - proxyRegions：订阅节点的地区排序定义，越靠前排序优先级越高；未匹配的节点按原顺序排在后面，不按地区筛选。keywords 使用不区分大小写的子串匹配，codes 只匹配两侧不紧邻英文字母的地区代码。
  * - excludedProxyNameRules：订阅节点黑名单，匹配方式同上；命中后一定移除。空数组表示不排除任何节点。
+ * - includedProxyNameRules：订阅节点白名单，匹配方式同上；非空时只保留命中的订阅节点，空数组表示不限制。当前保留香港、日本、韩国、美国、台湾和英国节点，黑名单优先于白名单。
  * - usProxyGroup：美国节点专用代理组；url 是延迟检测地址，interval 是检测间隔秒数。
  * - usRuleProviderNames：强制使用美国节点组的 rule-provider 名称，必须与合并配置中的名称完全一致。
  * - openAiProxyGroup：OpenAI 专用代理组，在当前 profile 的普通代理组和 US 之间手动选择。
@@ -90,6 +91,41 @@ const excludedProxyNameRules = [
   //   name: "联通",
   //   keywords: ["联通"],
   // },
+];
+
+// 从 proxy groups 里只保留白名单命中的订阅节点（不删除 config.proxies）。
+// 空数组表示不启用；黑名单与白名单同时命中时，按黑名单移除。
+const includedProxyNameRules = [
+  {
+    name: "香港",
+    keywords: ["香港", "Hong Kong", "🇭🇰"],
+    codes: ["HK"],
+  },
+  {
+    name: "日本",
+    keywords: ["日本", "Japan", "Tokyo", "Osaka", "🇯🇵"],
+    codes: ["JP"],
+  },
+  {
+    name: "韩国",
+    keywords: ["韩国", "韓國", "Korea", "Seoul", "🇰🇷"],
+    codes: ["KR"],
+  },
+  {
+    name: "美国",
+    keywords: ["美国", "美國", "United States", "America", "🇺🇸"],
+    codes: ["US", "USA"],
+  },
+  // {
+  //   name: "台湾",
+  //   keywords: ["台湾", "台灣", "Taiwan", "Taipei", "🇹🇼"],
+  //   codes: ["TW"],
+  // },
+  {
+    name: "英国",
+    keywords: ["英国", "英國", "United Kingdom", "Britain", "London", "🇬🇧"],
+    codes: ["UK"],
+  },
 ];
 
 // 只包含命中“美国”规则的真实订阅节点，并按延迟自动选择节点。
@@ -375,6 +411,21 @@ function shouldExcludeProxyName(proxyName) {
   });
 }
 
+function shouldIncludeProxyName(proxyName) {
+  if (typeof proxyName !== "string") return false;
+  if (includedProxyNameRules.length === 0) return true;
+
+  return includedProxyNameRules.some((rule) => {
+    return matchesProxyNameRule(proxyName, rule);
+  });
+}
+
+function shouldKeepProxyName(proxyName) {
+  return (
+    shouldIncludeProxyName(proxyName) && !shouldExcludeProxyName(proxyName)
+  );
+}
+
 function ensureUsProxyGroup(config) {
   if (!Array.isArray(config.proxies)) return;
 
@@ -386,7 +437,7 @@ function ensureUsProxyGroup(config) {
 
       return region && region.id === "US";
     })
-    .filter((proxyName) => !shouldExcludeProxyName(proxyName));
+    .filter((proxyName) => shouldKeepProxyName(proxyName));
 
   const groups = getProxyGroups(config);
   const oldGroup = groups.find(
@@ -485,7 +536,7 @@ function filterAndSortProxyGroupProxies(config) {
     group.proxies = group.proxies.filter((proxyName) => {
       if (!proxyNames.has(proxyName)) return true;
 
-      return !shouldExcludeProxyName(proxyName);
+      return shouldKeepProxyName(proxyName);
     });
 
     const hasProxyNode = group.proxies.some((proxyName) =>
@@ -495,7 +546,7 @@ function filterAndSortProxyGroupProxies(config) {
     // 仅当原组含订阅节点且筛选后清空时告警，避免对纯策略组误报。
     if (hadProxyNode && !hasProxyNode) {
       console.warn(
-        `[clash-verge] No proxy nodes remain in group "${group.name || "<unnamed>"}" after exclusion filtering.`,
+        `[clash-verge] No proxy nodes remain in group "${group.name || "<unnamed>"}" after whitelist/blacklist filtering.`,
       );
     }
 
