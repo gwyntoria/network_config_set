@@ -1,6 +1,6 @@
 # NAME: Game
 # SOURCE: https://github.com/gwyntoria/network_config_set/blob/main/rules/quantumult-x/game.list
-# UPDATED: 2026-10-24
+# UPDATED: 2026-10-25
 
 # Steam China - Platform
 HOST,csgo.wmsj.cn,direct
@@ -51,6 +51,7 @@ HOST-SUFFIX,dl.playstation.net,direct
 HOST-SUFFIX,s.team,proxy
 HOST-SUFFIX,steamdeck.com,proxy
 HOST-SUFFIX,steamgames.com,proxy
+HOST-SUFFIX,steampowered.com,proxy
 HOST-SUFFIX,steamstat.us,proxy
 
 # Steam - Community & Chat

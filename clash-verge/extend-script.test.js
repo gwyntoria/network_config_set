@@ -36,6 +36,44 @@ function getGroup(config, name) {
   return config["proxy-groups"].find((group) => group.name === name);
 }
 
+function readGameProviderRules(fileName) {
+  const filePath = path.join(__dirname, "..", "rules", "clash", fileName);
+  const source = fs.readFileSync(filePath, "utf8");
+
+  return source
+    .split(/\r?\n/)
+    .map((line) => line.match(/^\s*-\s+(\S+)\s*$/))
+    .filter(Boolean)
+    .map((match) => match[1]);
+}
+
+function matchesRule(rule, host) {
+  const [type, value] = rule.split(",");
+
+  if (type === "DOMAIN") return host === value;
+  if (type === "DOMAIN-SUFFIX") {
+    return host === value || host.endsWith(`.${value}`);
+  }
+
+  return false;
+}
+
+function resolveGamePolicy(host) {
+  // GameDirect 先于 GameProxy 插入，Mihomo 按首条命中规则执行。
+  const providers = [
+    ["game-direct.yaml", "DIRECT"],
+    ["game-proxy.yaml", "PROXY"],
+  ];
+
+  for (const [fileName, policy] of providers) {
+    const rules = readGameProviderRules(fileName);
+
+    if (rules.some((rule) => matchesRule(rule, host))) return policy;
+  }
+
+  return null;
+}
+
 test("recognizes one region per node and sorts known regions stably", () => {
   const main = loadMain();
   const config = makeConfig([
@@ -115,6 +153,30 @@ test("routes game rule providers before subscription rules", () => {
   assert.notEqual(gameProxyIndex, -1);
   assert.ok(gameDirectIndex < gameProxyIndex);
   assert.ok(gameProxyIndex < subscriptionRuleIndex);
+});
+
+test("keeps Steam store proxied while download hosts stay direct", () => {
+  const proxiedHosts = [
+    "store.steampowered.com",
+    "checkout.steampowered.com",
+    "login.steampowered.com",
+    "steamcommunity.com",
+  ];
+  const directHosts = [
+    "client-download.steampowered.com",
+    "api.steampowered.com",
+    "cdn.steampowered.com",
+    "steamcontent.com",
+    "steamstatic.com",
+  ];
+
+  for (const host of proxiedHosts) {
+    assert.equal(resolveGamePolicy(host), "PROXY", host);
+  }
+
+  for (const host of directHosts) {
+    assert.equal(resolveGamePolicy(host), "DIRECT", host);
+  }
 });
 
 test("is idempotent for managed groups and rules", () => {

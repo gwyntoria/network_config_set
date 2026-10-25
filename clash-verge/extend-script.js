@@ -145,10 +145,10 @@ const dnsOverrides = {
   ],
 };
 
-const directRuleProviderNames = ["GameDirect"];
 const rejectRuleProviderNames = ["AD"];
-const usRuleProviderNames = ["TikTok", "PayPal", "Gemini", "Anthropic"];
+const directRuleProviderNames = ["GameDirect"];
 const proxyRuleProviderNames = ["GameProxy"];
+const usRuleProviderNames = ["TikTok", "PayPal", "Gemini", "Anthropic"];
 
 // 需要强制直连的规则放在这里，避免国内服务、办公软件和支付场景误走代理。
 const directRules = [
