@@ -1,12 +1,16 @@
 # NAME: Personality
 # POLICY: direct
 # SOURCE: https://github.com/gwyntoria/network_config_set/blob/main/rules/quantumult-x/personality.list
-# UPDATED: 2026-09-16
+# UPDATED: 2026-10-27
 
 # direct
 HOST-SUFFIX,caixin.com,direct
 HOST-SUFFIX,dedao.com,direct
 HOST-SUFFIX,linuxdo.org,direct
+
+# JYP Bubble (Dear U)
+HOST-SUFFIX,dear-u.co,direct
+HOST-SUFFIX,dearu.com,direct
 
 # proxy
 HOST-SUFFIX,mushroomtrack.com,proxy
