@@ -57,28 +57,28 @@ const proxyRegions = [
     codes: ["HK"],
   },
   {
-    id: "US",
-    name: "美国",
-    keywords: ["美国", "美國", "United States", "America", "🇺🇸"],
-    codes: ["US", "USA"],
-  },
-  {
     id: "JP",
     name: "日本",
     keywords: ["日本", "Japan", "Tokyo", "Osaka", "🇯🇵"],
     codes: ["JP"],
   },
   {
-    id: "SG",
-    name: "新加坡",
-    keywords: ["新加坡", "Singapore", "狮城", "🇸🇬"],
-    codes: ["SG"],
-  },
-  {
     id: "KR",
     name: "韩国",
     keywords: ["韩国", "韓國", "South Korea", "Korea", "Seoul", "🇰🇷"],
     codes: ["KR"],
+  },
+  {
+    id: "US",
+    name: "美国",
+    keywords: ["美国", "美國", "United States", "America", "🇺🇸"],
+    codes: ["US", "USA"],
+  },
+  {
+    id: "SG",
+    name: "新加坡",
+    keywords: ["新加坡", "Singapore", "狮城", "🇸🇬"],
+    codes: ["SG"],
   },
 ];
 
