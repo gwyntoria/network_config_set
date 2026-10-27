@@ -7,10 +7,12 @@
  * - proxyPolicyCandidates：映射未命中时使用的代理组候选名称，越靠前越优先。
  * - proxyRegions：订阅节点的地区排序定义，越靠前排序优先级越高；未匹配的节点按原顺序排在后面，不按地区筛选。keywords 使用不区分大小写的子串匹配，codes 只匹配两侧不紧邻英文字母的地区代码。
  * - excludedProxyNameRules：订阅节点黑名单，匹配方式同上；命中后一定移除。空数组表示不排除任何节点。
- * - includedProxyNameRules：订阅节点白名单，匹配方式同上；非空时只保留命中的订阅节点，空数组表示不限制。当前保留香港、日本、韩国、美国、台湾和英国节点，黑名单优先于白名单。
- * - usProxyGroup：美国节点专用代理组；url 是延迟检测地址，interval 是检测间隔秒数。
- * - usRuleProviderNames：强制使用美国节点组的 rule-provider 名称，必须与合并配置中的名称完全一致。
- * - openAiProxyGroup：OpenAI 专用代理组，在当前 profile 的普通代理组和 US 之间手动选择。
+ * - includedProxyNameRules：订阅节点白名单，匹配方式同上；非空时只保留命中的订阅节点，空数组表示不限制。当前保留香港、美国、日本、新加坡、韩国和英国节点，黑名单优先于白名单。
+ * - regionProxyGroups：美国、日本、新加坡节点专用代理组，只包含对应地区的订阅节点，统一使用手动选择。
+ * - aiProxyGroup：AI 专用代理组，在当前 profile 的普通代理组和 US、JP、SG 之间手动选择。
+ * - aiRuleProviderNames：强制使用 AI 代理组的 rule-provider 名称，必须与合并配置中的名称完全一致。
+ * - tiktokProxyGroup：TikTok 专用代理组，选项与 AI 代理组相同。
+ * - tiktokRuleProviderNames：强制使用 TikTok 代理组的 rule-provider 名称。
  * - rejectRuleProviderNames：使用 REJECT 策略的 rule-provider 名称。
  * - directRuleProviderNames：使用 DIRECT 策略的 rule-provider 名称。
  * - proxyRuleProviderNames：使用当前 profile 代理策略的 rule-provider 名称。
@@ -20,7 +22,8 @@
  *   导致境外域名解析停滞、以及缺少 proxy-server-nameserver 导致节点域名解析失败的问题。
  *
  * 规则顺序为 directRules、directRuleProviderNames、rejectRuleProviderNames、
- * OpenAI、usRuleProviderNames、proxyRuleProviderNames、proxyRulePrefixes、订阅原规则，
+ * aiRuleProviderNames、tiktokRuleProviderNames、proxyRuleProviderNames、
+ * proxyRulePrefixes、订阅原规则，
  * Mihomo 按首条匹配规则执行。节点筛选和排序只处理 config.proxies 中的真实订阅节点，
  * DIRECT、REJECT 以及其他代理组引用会保留在原位置。上述列表中的 name 仅用于标注，
  * 不参与匹配。
@@ -66,6 +69,12 @@ const proxyRegions = [
     codes: ["JP"],
   },
   {
+    id: "SG",
+    name: "新加坡",
+    keywords: ["新加坡", "Singapore", "狮城", "🇸🇬"],
+    codes: ["SG"],
+  },
+  {
     id: "KR",
     name: "韩国",
     keywords: ["韩国", "韓國", "South Korea", "Korea", "Seoul", "🇰🇷"],
@@ -107,6 +116,11 @@ const includedProxyNameRules = [
     codes: ["JP"],
   },
   {
+    name: "新加坡",
+    keywords: ["新加坡", "Singapore", "狮城", "🇸🇬"],
+    codes: ["SG"],
+  },
+  {
     name: "韩国",
     keywords: ["韩国", "韓國", "Korea", "Seoul", "🇰🇷"],
     codes: ["KR"],
@@ -128,18 +142,20 @@ const includedProxyNameRules = [
   },
 ];
 
-// 只包含命中“美国”规则的真实订阅节点，并按延迟自动选择节点。
-const usProxyGroup = {
-  name: "US",
-  type: "select",
+// 地区选择组：regionId 对应 proxyRegions 中的 id，只包含该地区的真实订阅节点。
+const regionProxyGroups = [
+  { name: "US", regionId: "US" },
+  { name: "JP", regionId: "JP" },
+  { name: "SG", regionId: "SG" },
+];
 
-  // type: "url-test",
-  // url: "https://www.gstatic.com/generate_204",
-  // interval: 1800,
+const aiProxyGroup = {
+  name: "AI",
+  type: "select",
 };
 
-const openAiProxyGroup = {
-  name: "OpenAI",
+const tiktokProxyGroup = {
+  name: "TikTok",
   type: "select",
 };
 
@@ -183,8 +199,9 @@ const dnsOverrides = {
 
 const rejectRuleProviderNames = ["AD"];
 const directRuleProviderNames = ["GameDirect"];
-const proxyRuleProviderNames = ["GameProxy"];
-const usRuleProviderNames = ["TikTok", "PayPal", "Gemini", "Anthropic"];
+const proxyRuleProviderNames = ["GameProxy", "PayPal"];
+const aiRuleProviderNames = ["OpenAI", "Gemini", "Anthropic"];
+const tiktokRuleProviderNames = ["TikTok"];
 
 // 需要强制直连的规则放在这里，避免国内服务、办公软件和支付场景误走代理。
 const directRules = [
@@ -236,18 +253,28 @@ function buildProxyRules(proxyPolicy) {
   return proxyRulePrefixes.map((rule) => `${rule},${proxyPolicy}`);
 }
 
-function buildUsProxyRules(config) {
-  if (!getProxyGroupNames(config).includes(usProxyGroup.name)) return [];
+function buildProxyGroupRuleProviderRules(config, providerNames, groupName) {
+  if (!getProxyGroupNames(config).includes(groupName)) return [];
 
-  return usRuleProviderNames.map(
-    (providerName) => `RULE-SET,${providerName},${usProxyGroup.name}`,
+  return providerNames.map(
+    (providerName) => `RULE-SET,${providerName},${groupName}`,
   );
 }
 
-function buildOpenAiProxyRules(config) {
-  if (!getProxyGroupNames(config).includes(openAiProxyGroup.name)) return [];
+function buildAiProxyRules(config) {
+  return buildProxyGroupRuleProviderRules(
+    config,
+    aiRuleProviderNames,
+    aiProxyGroup.name,
+  );
+}
 
-  return [`RULE-SET,OpenAI,${openAiProxyGroup.name}`];
+function buildTikTokProxyRules(config) {
+  return buildProxyGroupRuleProviderRules(
+    config,
+    tiktokRuleProviderNames,
+    tiktokProxyGroup.name,
+  );
 }
 
 function buildRejectRules() {
@@ -342,8 +369,8 @@ function mergeProxyRules(config, profileName) {
     directRules
       .concat(buildDirectRuleProviderRules())
       .concat(buildRejectRules())
-      .concat(buildOpenAiProxyRules(config))
-      .concat(buildUsProxyRules(config))
+      .concat(buildAiProxyRules(config))
+      .concat(buildTikTokProxyRules(config))
       .concat(buildProxyRuleProviderRules(proxyPolicy))
       .concat(proxyRules)
       .concat(oldRules),
@@ -426,39 +453,104 @@ function shouldKeepProxyName(proxyName) {
   );
 }
 
-function ensureUsProxyGroup(config) {
+function ensureRegionProxyGroups(config) {
   if (!Array.isArray(config.proxies)) return;
 
-  const usProxyNames = config.proxies
+  const keptProxyNames = config.proxies
     .map(getProxyName)
     .filter(Boolean)
-    .filter((proxyName) => {
-      const region = getProxyRegion(proxyName);
-
-      return region && region.id === "US";
-    })
     .filter((proxyName) => shouldKeepProxyName(proxyName));
 
+  let groups = getProxyGroups(config);
+  const removedGroupNames = new Set();
+
+  for (const regionGroup of regionProxyGroups) {
+    const regionProxyNames = keptProxyNames.filter((proxyName) => {
+      const region = getProxyRegion(proxyName);
+
+      return region && region.id === regionGroup.regionId;
+    });
+
+    if (regionProxyNames.length === 0) {
+      removedGroupNames.add(regionGroup.name);
+      console.warn(
+        `[clash-verge] No ${regionGroup.name} proxy nodes found. ${regionGroup.name} group was skipped.`,
+      );
+      continue;
+    }
+
+    const oldGroup = groups.find(
+      (group) => group && group.name === regionGroup.name,
+    );
+
+    const nextGroup = {
+      ...oldGroup,
+      name: regionGroup.name,
+      type: "select",
+      proxies: regionProxyNames,
+    };
+
+    // 手动选择组不需要延迟检测字段，避免订阅自带的 url-test 配置残留。
+    delete nextGroup.url;
+    delete nextGroup.interval;
+
+    if (oldGroup) {
+      groups[groups.indexOf(oldGroup)] = nextGroup;
+    } else {
+      groups.push(nextGroup);
+    }
+  }
+
+  if (removedGroupNames.size > 0) {
+    groups = groups.filter(
+      (group) => !group || !removedGroupNames.has(group.name),
+    );
+  }
+
+  config["proxy-groups"] = groups;
+}
+
+function getManagedProxyGroupProxies(config, profileName, groupName) {
+  const groupNames = new Set(getProxyGroupNames(config));
+  const candidates = [
+    resolveProxyPolicy(config, profileName),
+    ...regionProxyGroups.map((regionGroup) => regionGroup.name),
+  ];
+
+  return Array.from(new Set(candidates)).filter(
+    (candidate) =>
+      candidate && candidate !== groupName && groupNames.has(candidate),
+  );
+}
+
+function ensureSelectProxyGroup(config, profileName, definition, warnMessage) {
   const groups = getProxyGroups(config);
   const oldGroup = groups.find(
-    (group) => group && group.name === usProxyGroup.name,
+    (group) => group && group.name === definition.name,
+  );
+  const proxies = getManagedProxyGroupProxies(
+    config,
+    profileName,
+    definition.name,
   );
 
-  if (usProxyNames.length === 0) {
+  if (proxies.length === 0) {
     config["proxy-groups"] = groups.filter(
-      (group) => !group || group.name !== usProxyGroup.name,
+      (group) => !group || group.name !== definition.name,
     );
-    console.warn(
-      "[clash-verge] No US proxy nodes found. US rules were skipped.",
-    );
+    console.warn(warnMessage);
     return;
   }
 
   const nextGroup = {
     ...oldGroup,
-    ...usProxyGroup,
-    proxies: usProxyNames,
+    ...definition,
+    proxies,
   };
+
+  // 手动选择组不需要延迟检测字段，避免订阅自带的 url-test 配置残留。
+  delete nextGroup.url;
+  delete nextGroup.interval;
 
   if (oldGroup) {
     groups[groups.indexOf(oldGroup)] = nextGroup;
@@ -469,42 +561,15 @@ function ensureUsProxyGroup(config) {
   config["proxy-groups"] = groups;
 }
 
-function ensureOpenAiProxyGroup(config, profileName) {
+function removeProxyGroup(config, groupName) {
   const groups = getProxyGroups(config);
-  const oldGroup = groups.find(
-    (group) => group && group.name === openAiProxyGroup.name,
-  );
-  const proxyPolicy = resolveProxyPolicy(config, profileName);
-  const proxies = Array.from(new Set([proxyPolicy, usProxyGroup.name])).filter(
-    (groupName) =>
-      groupName &&
-      groupName !== openAiProxyGroup.name &&
-      getProxyGroupNames(config).includes(groupName),
+  const nextGroups = groups.filter(
+    (group) => !group || group.name !== groupName,
   );
 
-  if (proxies.length === 0) {
-    config["proxy-groups"] = groups.filter(
-      (group) => !group || group.name !== openAiProxyGroup.name,
-    );
-    console.warn(
-      "[clash-verge] No proxy groups found for OpenAI. OpenAI rules were skipped.",
-    );
-    return;
+  if (nextGroups.length !== groups.length) {
+    config["proxy-groups"] = nextGroups;
   }
-
-  const nextGroup = {
-    ...oldGroup,
-    ...openAiProxyGroup,
-    proxies,
-  };
-
-  if (oldGroup) {
-    groups[groups.indexOf(oldGroup)] = nextGroup;
-  } else {
-    groups.push(nextGroup);
-  }
-
-  config["proxy-groups"] = groups;
 }
 
 function compareProxyRegion(left, right) {
@@ -588,8 +653,20 @@ function applyDnsOverrides(config) {
 
 function main(config, profileName) {
   applyDnsOverrides(config);
-  ensureUsProxyGroup(config);
-  ensureOpenAiProxyGroup(config, profileName);
+  removeProxyGroup(config, "OpenAI");
+  ensureRegionProxyGroups(config);
+  ensureSelectProxyGroup(
+    config,
+    profileName,
+    tiktokProxyGroup,
+    "[clash-verge] No proxy groups found for TikTok. TikTok rules were skipped.",
+  );
+  ensureSelectProxyGroup(
+    config,
+    profileName,
+    aiProxyGroup,
+    "[clash-verge] No proxy groups found for AI. AI rules were skipped.",
+  );
   filterAndSortProxyGroupProxies(config);
   mergeProxyRules(config, profileName);
   return config;

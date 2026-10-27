@@ -180,11 +180,113 @@ test("keeps only the configured whitelist regions", () => {
     "US-01",
     "JP-01",
     "韩国 A01",
-    "TW-01",
     "英国 A01",
     "DIRECT",
   ]);
   assert.deepEqual(Array.from(getGroup(config, "US").proxies), ["US-01"]);
+});
+
+test("creates US, JP and SG groups in select mode", () => {
+  const main = loadMain();
+  const config = makeConfig(["US-01", "JP-01", "SG-01"]);
+
+  main(config, "UNKNOWN");
+
+  for (const [groupName, proxyName] of [
+    ["US", "US-01"],
+    ["JP", "JP-01"],
+    ["SG", "SG-01"],
+  ]) {
+    const group = getGroup(config, groupName);
+
+    assert.ok(group);
+    assert.equal(group.type, "select");
+    assert.deepEqual(Array.from(group.proxies), [proxyName]);
+    assert.equal(group.url, undefined);
+    assert.equal(group.interval, undefined);
+  }
+});
+
+test("creates AI and TikTok groups with proxy and region choices", () => {
+  const main = loadMain();
+  const config = makeConfig(["US-01", "JP-01", "SG-01"]);
+
+  main(config, "UNKNOWN");
+
+  for (const groupName of ["AI", "TikTok"]) {
+    const group = getGroup(config, groupName);
+
+    assert.ok(group);
+    assert.equal(group.type, "select");
+    assert.deepEqual(Array.from(group.proxies), [
+      "Proxy",
+      "US",
+      "JP",
+      "SG",
+    ]);
+  }
+
+  assert.equal(config["proxy-groups"].at(-1).name, "AI");
+});
+
+test("routes AI, TikTok and PayPal rule providers to their groups", () => {
+  const main = loadMain();
+  const config = makeConfig(["US-01", "JP-01", "SG-01"]);
+
+  main(config, "UNKNOWN");
+
+  for (const rule of [
+    "RULE-SET,OpenAI,AI",
+    "RULE-SET,Gemini,AI",
+    "RULE-SET,Anthropic,AI",
+    "RULE-SET,TikTok,TikTok",
+    "RULE-SET,PayPal,Proxy",
+  ]) {
+    assert.ok(config.rules.includes(rule), rule);
+  }
+
+  assert.ok(!config.rules.includes("RULE-SET,PayPal,US"));
+});
+
+test("skips missing region choices and removes the legacy OpenAI group", () => {
+  const main = loadMain();
+  const config = makeConfig(["US-01"]);
+
+  config["proxy-groups"].push({
+    name: "OpenAI",
+    type: "select",
+    proxies: ["Proxy"],
+  });
+
+  main(config, "UNKNOWN");
+
+  assert.equal(getGroup(config, "JP"), undefined);
+  assert.equal(getGroup(config, "SG"), undefined);
+  assert.equal(getGroup(config, "OpenAI"), undefined);
+  assert.deepEqual(Array.from(getGroup(config, "AI").proxies), [
+    "Proxy",
+    "US",
+  ]);
+  assert.deepEqual(Array.from(getGroup(config, "TikTok").proxies), [
+    "Proxy",
+    "US",
+  ]);
+});
+
+test("places AI and TikTok rules before the general proxy providers", () => {
+  const main = loadMain();
+  const config = makeConfig(["US-01", "JP-01", "SG-01"]);
+
+  main(config, "UNKNOWN");
+
+  const aiIndex = config.rules.indexOf("RULE-SET,OpenAI,AI");
+  const tiktokIndex = config.rules.indexOf("RULE-SET,TikTok,TikTok");
+  const paypalIndex = config.rules.indexOf("RULE-SET,PayPal,Proxy");
+  const subscriptionIndex = config.rules.indexOf("MATCH,DIRECT");
+
+  assert.ok(aiIndex < tiktokIndex);
+  assert.ok(tiktokIndex < paypalIndex);
+  assert.ok(paypalIndex < subscriptionIndex);
 });
 
 test("filters nodes by whitelist with blacklist taking precedence", () => {

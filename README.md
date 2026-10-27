@@ -78,11 +78,13 @@ https://raw.githubusercontent.com/gwyntoria/network_config_set/main/rules/quantu
 
 当前拓展脚本会处理以下内容：
 
-- 只保留香港、日本、韩国、美国、台湾和英国的订阅节点。
-- 保留节点按港、美、日、韩的顺序优先排列，未配置地区的节点按原顺序排在后面。
+- 只保留香港、美国、日本、新加坡、韩国和英国的订阅节点。
+- 保留节点按港、美、日、新、韩的顺序优先排列，未配置地区的节点按原顺序排在后面。
 - 排除名称中含 `IPv6` 的订阅节点。
-- 创建 `US` 策略组，并让 TikTok、PayPal、Gemini 和 Anthropic 规则使用该组。
-- 创建 `OpenAI` 策略组，可在当前 profile 的普通代理组与 `US` 组之间选择。并将 OpenAI 规则使用该策略组。
+- 创建 `US`、`JP`、`SG` 策略组，只包含对应地区的订阅节点，均使用手动选择模式。
+- 创建 `AI` 策略组，可在当前 profile 的普通代理组与 `US`、`JP`、`SG` 组之间选择，OpenAI、Gemini 和 Anthropic 规则使用该组。
+- 创建 `TikTok` 策略组，选项与 `AI` 相同，TikTok 规则使用该组。
+- 将 PayPal 规则指向当前 profile 的普通代理组。
 - 将广告 provider 指向 `REJECT`，将游戏直连和代理 provider 分别指向 `DIRECT` 与当前 profile 的代理组。
 - 添加国内服务直连规则。
 
@@ -91,9 +93,10 @@ https://raw.githubusercontent.com/gwyntoria/network_config_set/main/rules/quantu
 - `profilePolicyMap`：profile 名称与代理组名称的对应关系。
 - `proxyPolicyCandidates`：profile 未命中时的代理组候选名称。
 - `proxyRegions`：地区识别和排列顺序，匹配的节点优先排列，其余节点保留原有顺序。
+- `regionProxyGroups`：地区策略组定义，组名与 `proxyRegions` 中的地区 id 对应。
 - `excludedProxyNameRules`：节点名称黑名单。
 - `includedProxyNameRules`：节点名称白名单。非空时只保留命中的订阅节点；黑名单优先，空数组表示不限制。
-- `usRuleProviderNames`、`rejectRuleProviderNames`、`directRuleProviderNames` 与 `proxyRuleProviderNames`：provider 的分流策略。
+- `aiRuleProviderNames`、`tiktokRuleProviderNames`、`rejectRuleProviderNames`、`directRuleProviderNames` 与 `proxyRuleProviderNames`：provider 的分流策略。
 - `directRules` 与 `proxyRulePrefixes`：直接插入配置的自定义规则。
 
 脚本插入规则时采用以下顺序：
@@ -102,8 +105,8 @@ https://raw.githubusercontent.com/gwyntoria/network_config_set/main/rules/quantu
 直连规则
 直连 provider 规则
 广告拦截规则
-OpenAI 规则
-美国节点组规则
+AI 规则
+TikTok 规则
 代理 provider 规则
 强制代理规则
 订阅原有规则
@@ -121,7 +124,7 @@ Mihomo 使用首条命中的规则，修改这些列表时需保留所需的优�
 node --test clash-verge/extend-script.test.js
 ```
 
-测试覆盖地区识别与稳定排序、未配置地区节点和代理组引用的保留、黑白名单筛选与优先级，以及脚本重复运行后的幂等性。
+测试覆盖地区识别与稳定排序、未配置地区节点和代理组引用的保留、黑白名单筛选与优先级、AI/TikTok 组的选项与 PayPal 分流，以及脚本重复运行后的幂等性。
 
 ## 规则来源
 
