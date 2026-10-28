@@ -7,9 +7,9 @@
  * - proxyPolicyCandidates：映射未命中时使用的代理组候选名称，越靠前越优先。
  * - proxyRegions：订阅节点的地区排序定义，越靠前排序优先级越高；未匹配的节点按原顺序排在后面，不按地区筛选。keywords 使用不区分大小写的子串匹配，codes 只匹配两侧不紧邻英文字母的地区代码。
  * - excludedProxyNameRules：订阅节点黑名单，匹配方式同上；命中后一定移除。空数组表示不排除任何节点。
- * - includedProxyNameRules：订阅节点白名单，匹配方式同上；非空时只保留命中的订阅节点，空数组表示不限制。当前保留香港、美国、日本、新加坡、韩国和英国节点，黑名单优先于白名单。
- * - regionProxyGroups：美国、日本、新加坡节点专用代理组，只包含对应地区的订阅节点，统一使用手动选择。
- * - aiProxyGroup：AI 专用代理组，在当前 profile 的普通代理组和 US、JP、SG 之间手动选择。
+ * - includedProxyNameRules：订阅节点白名单，匹配方式同上；非空时只保留命中的订阅节点，空数组表示不限制。当前保留香港、美国、日本、韩国和英国节点，黑名单优先于白名单。
+ * - regionProxyGroups：美国、日本节点专用代理组，只包含对应地区的订阅节点，统一使用手动选择。
+ * - aiProxyGroup：AI 专用代理组，在当前 profile 的普通代理组和 US、JP 之间手动选择。
  * - aiRuleProviderNames：强制使用 AI 代理组的 rule-provider 名称，必须与合并配置中的名称完全一致。
  * - tiktokProxyGroup：TikTok 专用代理组，选项与 AI 代理组相同。
  * - tiktokRuleProviderNames：强制使用 TikTok 代理组的 rule-provider 名称。
@@ -116,11 +116,6 @@ const includedProxyNameRules = [
     codes: ["JP"],
   },
   {
-    name: "新加坡",
-    keywords: ["新加坡", "Singapore", "狮城", "🇸🇬"],
-    codes: ["SG"],
-  },
-  {
     name: "韩国",
     keywords: ["韩国", "韓國", "Korea", "Seoul", "🇰🇷"],
     codes: ["KR"],
@@ -146,7 +141,6 @@ const includedProxyNameRules = [
 const regionProxyGroups = [
   { name: "US", regionId: "US" },
   { name: "JP", regionId: "JP" },
-  { name: "SG", regionId: "SG" },
 ];
 
 const aiProxyGroup = {
