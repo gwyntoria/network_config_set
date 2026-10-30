@@ -7,9 +7,9 @@ HOST-SUFFIX,caixin.com,direct
 HOST-SUFFIX,dedao.com,direct
 HOST-SUFFIX,linuxdo.org,direct
 
-# JYP Bubble (Dear U)
-HOST-SUFFIX,dear-u.co,direct
-HOST-SUFFIX,dearu.com,direct
-
 # proxy
 HOST-SUFFIX,mushroomtrack.com,proxy
+
+# JYP Bubble (Dear U)
+HOST-SUFFIX,dear-u.co,proxy
+HOST-SUFFIX,dearu.com,proxy
