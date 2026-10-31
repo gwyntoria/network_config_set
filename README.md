@@ -76,18 +76,6 @@ https://raw.githubusercontent.com/gwyntoria/network_config_set/main/rules/quantu
 
 > **provider 和 脚本均可自定义，修改后需要保证拓展脚本引用的 provider 名称与拓展配置一致。**
 
-当前拓展脚本会处理以下内容：
-
-- 只保留香港、美国、日本、新加坡、韩国和英国的订阅节点。
-- 保留节点按港、美、日、新、韩的顺序优先排列，未配置地区的节点按原顺序排在后面。
-- 排除名称中含 `IPv6` 的订阅节点。
-- 创建 `US`、`JP`、`SG` 策略组，只包含对应地区的订阅节点，均使用手动选择模式。
-- 创建 `AI` 策略组，可在当前 profile 的普通代理组与 `US`、`JP`、`SG` 组之间选择，OpenAI、Gemini 和 Anthropic 规则使用该组。
-- 创建 `TikTok` 策略组，选项与 `AI` 相同，TikTok 规则使用该组。
-- 将 PayPal 规则指向当前 profile 的普通代理组。
-- 将广告 provider 指向 `REJECT`，将游戏直连和代理 provider 分别指向 `DIRECT` 与当前 profile 的代理组。
-- 添加国内服务直连规则。
-
 常用配置集中在脚本开头：
 
 - `profilePolicyMap`：profile 名称与代理组名称的对应关系。
@@ -126,9 +114,7 @@ node --test clash-verge/extend-script.test.js
 
 测试覆盖地区识别与稳定排序、未配置地区节点和代理组引用的保留、黑白名单筛选与优先级、AI/TikTok 组的选项与 PayPal 分流，以及脚本重复运行后的幂等性。
 
-## 规则来源
-
-各规则文件头部使用 `SOURCE` 记录本仓库中的文件地址，使用 `REFERENCE` 记录规则参考的上游项目。
+## 规则参考来源
 
 - 广告规则：[earoftoast/clash-rules](https://github.com/earoftoast/clash-rules)。
 - Anthropic 规则： [xiaolai/anthropic-claude-surge-rules-set](https://github.com/xiaolai/anthropic-claude-surge-rules-set)。
