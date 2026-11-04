@@ -186,30 +186,53 @@ test("keeps only the configured whitelist regions", () => {
   assert.deepEqual(Array.from(getGroup(config, "US").proxies), ["US-01"]);
 });
 
-test("creates US, JP and SG groups in select mode", () => {
+test("creates US and JP groups with hourly automatic latency selection", () => {
   const main = loadMain();
-  const config = makeConfig(["US-01", "JP-01", "SG-01"]);
+  const config = makeConfig(["US-01", "JP-01", "US-02", "JP-02", "JP-IPv6"]);
 
   main(config, "UNKNOWN");
 
-  for (const [groupName, proxyName] of [
-    ["US", "US-01"],
-    ["JP", "JP-01"],
-    ["SG", "SG-01"],
+  for (const [groupName, proxyNames] of [
+    ["US", ["US-01", "US-02"]],
+    ["JP", ["JP-01", "JP-02"]],
   ]) {
     const group = getGroup(config, groupName);
 
     assert.ok(group);
-    assert.equal(group.type, "select");
-    assert.deepEqual(Array.from(group.proxies), [proxyName]);
-    assert.equal(group.url, undefined);
-    assert.equal(group.interval, undefined);
+    assert.equal(group.type, "url-test");
+    assert.deepEqual(Array.from(group.proxies), proxyNames);
+    assert.equal(group.url, "https://www.gstatic.com/generate_204");
+    assert.equal(group.interval, 3600);
+    assert.equal(group.lazy, false);
+    assert.equal(group.tolerance, 0);
   }
+});
+
+test("replaces existing regional settings and removes groups without eligible nodes", () => {
+  const main = loadMain();
+  const config = makeConfig(["US-01", "JP-IPv6"]);
+  for (const name of ["US", "JP"]) {
+    config["proxy-groups"].push({
+      name, type: "select", proxies: ["DIRECT"],
+      url: "https://example.com", interval: 60, lazy: true, tolerance: 100,
+    });
+  }
+
+  main(config, "UNKNOWN");
+
+  const us = getGroup(config, "US");
+  assert.equal(us.type, "url-test");
+  assert.equal(us.url, "https://www.gstatic.com/generate_204");
+  assert.equal(us.interval, 3600);
+  assert.equal(us.lazy, false);
+  assert.equal(us.tolerance, 0);
+  assert.deepEqual(Array.from(us.proxies), ["US-01"]);
+  assert.equal(getGroup(config, "JP"), undefined);
 });
 
 test("creates AI and TikTok groups with proxy and region choices", () => {
   const main = loadMain();
-  const config = makeConfig(["US-01", "JP-01", "SG-01"]);
+  const config = makeConfig(["US-01", "JP-01"]);
 
   main(config, "UNKNOWN");
 
@@ -222,7 +245,6 @@ test("creates AI and TikTok groups with proxy and region choices", () => {
       "Proxy",
       "US",
       "JP",
-      "SG",
     ]);
   }
 
@@ -231,7 +253,7 @@ test("creates AI and TikTok groups with proxy and region choices", () => {
 
 test("routes AI, TikTok and PayPal rule providers to their groups", () => {
   const main = loadMain();
-  const config = makeConfig(["US-01", "JP-01", "SG-01"]);
+  const config = makeConfig(["US-01", "JP-01"]);
 
   main(config, "UNKNOWN");
 
@@ -261,7 +283,6 @@ test("skips missing region choices and removes the legacy OpenAI group", () => {
   main(config, "UNKNOWN");
 
   assert.equal(getGroup(config, "JP"), undefined);
-  assert.equal(getGroup(config, "SG"), undefined);
   assert.equal(getGroup(config, "OpenAI"), undefined);
   assert.deepEqual(Array.from(getGroup(config, "AI").proxies), [
     "Proxy",
@@ -275,7 +296,7 @@ test("skips missing region choices and removes the legacy OpenAI group", () => {
 
 test("places AI and TikTok rules before the general proxy providers", () => {
   const main = loadMain();
-  const config = makeConfig(["US-01", "JP-01", "SG-01"]);
+  const config = makeConfig(["US-01", "JP-01"]);
 
   main(config, "UNKNOWN");
 

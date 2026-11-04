@@ -8,7 +8,7 @@
  * - proxyRegions：订阅节点的地区排序定义，越靠前排序优先级越高；未匹配的节点按原顺序排在后面，不按地区筛选。keywords 使用不区分大小写的子串匹配，codes 只匹配两侧不紧邻英文字母的地区代码。
  * - excludedProxyNameRules：订阅节点黑名单，匹配方式同上；命中后一定移除。空数组表示不排除任何节点。
  * - includedProxyNameRules：订阅节点白名单，匹配方式同上；非空时只保留命中的订阅节点，空数组表示不限制。当前保留香港、美国、日本、韩国和英国节点，黑名单优先于白名单。
- * - regionProxyGroups：美国、日本节点专用代理组，只包含对应地区的订阅节点，统一使用手动选择。
+ * - regionProxyGroups：美国、日本节点专用代理组，只包含对应地区的订阅节点，每小时测速并自动选择低延迟节点。
  * - aiProxyGroup：AI 专用代理组，在当前 profile 的普通代理组和 US、JP 之间手动选择。
  * - aiRuleProviderNames：强制使用 AI 代理组的 rule-provider 名称，必须与合并配置中的名称完全一致。
  * - tiktokProxyGroup：TikTok 专用代理组，选项与 AI 代理组相同。
@@ -137,7 +137,7 @@ const includedProxyNameRules = [
   },
 ];
 
-// 地区选择组：regionId 对应 proxyRegions 中的 id，只包含该地区的真实订阅节点。
+// 地区自动选择组：regionId 对应 proxyRegions 中的 id，只包含该地区的真实订阅节点。
 const regionProxyGroups = [
   { name: "US", regionId: "US" },
   { name: "JP", regionId: "JP" },
@@ -480,13 +480,20 @@ function ensureRegionProxyGroups(config) {
     const nextGroup = {
       ...oldGroup,
       name: regionGroup.name,
-      type: "select",
+      // type: "select", // 原手动选择方式，保留以便恢复。
+      type: "url-test",
+      url: "https://www.gstatic.com/generate_204",
+      interval: 3600,
+      lazy: false, // 未使用该组时也按间隔测速。
+      tolerance: 0,
       proxies: regionProxyNames,
     };
 
-    // 手动选择组不需要延迟检测字段，避免订阅自带的 url-test 配置残留。
-    delete nextGroup.url;
-    delete nextGroup.interval;
+    // 原手动选择组不需要延迟检测字段，恢复 select 时同时恢复以下逻辑。
+    // delete nextGroup.url;
+    // delete nextGroup.interval;
+    // delete nextGroup.lazy;
+    // delete nextGroup.tolerance;
 
     if (oldGroup) {
       groups[groups.indexOf(oldGroup)] = nextGroup;
