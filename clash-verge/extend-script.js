@@ -586,13 +586,14 @@ function ensureRegionProxyGroups(config, providerNames) {
     const nextGroup = {
       ...oldGroup,
       name: regionGroup.name,
-      // type: "select", // 原手动选择方式，保留以便恢复。
-      type: "url-test",
-      url: "https://www.gstatic.com/generate_204",
-      interval: 3600,
-      lazy: false, // 未使用该组时也按间隔测速。
-      tolerance: 0,
-      proxies: regionProxyNames,
+      type: "select", // 原手动选择方式，保留以便恢复。
+
+      // type: "url-test",
+      // url: "https://www.gstatic.com/generate_204",
+      // interval: 3600,
+      // lazy: false, // 未使用该组时也按间隔测速。
+      // tolerance: 0,
+      // proxies: regionProxyNames,
     };
 
     if (providerNames.length > 0) {
