@@ -5,7 +5,7 @@ const test = require("node:test");
 const vm = require("node:vm");
 
 function loadScript() {
-  const scriptPath = path.join(__dirname, "extend-script.js");
+  const scriptPath = path.join(__dirname, "..", "extend-script.js");
   const source = fs.readFileSync(scriptPath, "utf8");
   const context = vm.createContext({
     console: { warn() {} },
@@ -59,7 +59,7 @@ function getGroup(config, name) {
 }
 
 function readGameProviderRules(fileName) {
-  const filePath = path.join(__dirname, "..", "rules", "clash", fileName);
+  const filePath = path.join(__dirname, "..", "..", "rules", "clash", fileName);
   const source = fs.readFileSync(filePath, "utf8");
 
   return source
@@ -110,18 +110,20 @@ test("recognizes one region per node and sorts known regions stably", () => {
   main(config, "UNKNOWN");
 
   assert.deepEqual(Array.from(getGroup(config, "Proxy").proxies), [
-    "US-02",
-    "JP-US Relay",
-    "US-01",
     "japan-01",
+    "JP-US Relay",
     "Tokyo-02",
+    "US-02",
+    "US-01",
     "RUSSIA-01",
     "DIRECT",
   ]);
   assert.deepEqual(Array.from(getGroup(config, "US").proxies), [
     "US-02",
-    "JP-US Relay",
     "US-01",
+  ]);
+  assert.deepEqual(Array.from(getGroup(config, "JP").proxies), [
+    "japan-01", "JP-US Relay", "Tokyo-02",
   ]);
 });
 
@@ -154,8 +156,8 @@ test("keeps exclusions separate from region recognition", () => {
   main(config, "UNKNOWN");
 
   assert.deepEqual(Array.from(getGroup(config, "Proxy").proxies), [
-    "US-01",
     "JP-01",
+    "US-01",
     "DIRECT",
   ]);
   assert.deepEqual(Array.from(getGroup(config, "US").proxies), ["US-01"]);
@@ -177,9 +179,9 @@ test("keeps only the configured whitelist regions", () => {
 
   assert.deepEqual(Array.from(getGroup(config, "Proxy").proxies), [
     "香港 A01",
-    "US-01",
     "JP-01",
     "韩国 A01",
+    "US-01",
     "英国 A01",
     "DIRECT",
   ]);
@@ -434,4 +436,180 @@ test("overrides managed DNS settings and preserves other fields", () => {
   delete config.dns;
   main(config, "UNKNOWN");
   assert.deepEqual(JSON.parse(JSON.stringify(config.dns)), expectedDns);
+});
+
+function addProviders(config) {
+  config["proxy-providers"] = {
+    sanmao: {
+      type: "http",
+      url: "https://example.invalid/sanmao",
+      path: "./proxy_providers/sanmao.yaml",
+      override: { "additional-prefix": "[三毛] " },
+    },
+    second: {
+      type: "http",
+      url: "https://example.invalid/second",
+      path: "./proxy_providers/second.yaml",
+      override: { "additional-prefix": "[US.JP+IPv6] " },
+    },
+  };
+}
+
+// 生成式使用 Mihomo 的 (?i) 标志，其余语法可直接交给 JavaScript 校验匹配结果。
+// 内核配置解析和真实 provider 展开另用 Mihomo 运行验证。
+function providerNodeNames(group, names) {
+  assert.ok(group.filter.startsWith("(?i)"));
+  const pattern = new RegExp(group.filter.slice(4), "i");
+  return names.filter((name) => pattern.test(name));
+}
+
+test("does not import providers when absent or empty", () => {
+  const main = loadMain();
+  const absent = makeConfig(["US-01", "JP-01"]);
+  const empty = makeConfig(["US-01", "JP-01"]);
+  empty["proxy-providers"] = {};
+  main(absent, "nozomi");
+  main(empty, "nozomi");
+  assert.equal(absent["proxy-providers"], undefined);
+  delete empty["proxy-providers"];
+  assert.equal(JSON.stringify(empty), JSON.stringify(absent));
+  for (const name of ["Proxy", "US", "JP"]) {
+    assert.equal(getGroup(absent, name).use, undefined);
+    assert.equal(getGroup(absent, name).filter, undefined);
+  }
+});
+
+test("attaches every provider to the main selector across profiles without duplicates", () => {
+  const main = loadMain();
+  for (const [profile, policy] of [["nozomi", "Proxy"], ["CLOUD", "🔰 手动选择"], ["GHELPER", "Ghelper"]]) {
+    const config = makeConfig(["JP-local", "US-local"]);
+    getGroup(config, "Proxy").name = policy;
+    getGroup(config, policy).use = ["sanmao"];
+    config["proxy-groups"].push({ name: "Other", type: "select", proxies: ["DIRECT"] });
+    addProviders(config);
+    main(config, profile);
+    const once = JSON.stringify(config);
+    main(config, profile);
+    assert.equal(JSON.stringify(config), once);
+    for (const name of [policy, "US", "JP"]) {
+      assert.deepEqual(Array.from(getGroup(config, name).use), ["sanmao", "second"]);
+    }
+    assert.deepEqual(Array.from(getGroup(config, policy).proxies), ["JP-local", "US-local", "DIRECT"]);
+    assert.equal(getGroup(config, "Other").use, undefined);
+    assert.equal(getGroup(config, "AI").use, undefined);
+    assert.equal(getGroup(config, "TikTok").use, undefined);
+  }
+});
+
+test("defaults provider refresh and exit while preserving YAML prefixes and overrides", () => {
+  const main = loadMain();
+  const config = makeConfig(["US-local"]);
+  addProviders(config);
+  const first = config["proxy-providers"].sanmao;
+  first.override.udp = true;
+  first["health-check"] = { timeout: 2500, lazy: true, interval: 30 };
+  const second = config["proxy-providers"].second;
+  second.interval = 7200;
+  second.proxy = "Proxy";
+  delete second.override;
+  main(config, "nozomi");
+  assert.equal(first.interval, 86400);
+  assert.equal(first.proxy, "DIRECT");
+  assert.equal(first.override["additional-prefix"], "[三毛] ");
+  assert.equal(first.override.udp, true);
+  assert.equal(second.interval, 7200);
+  assert.equal(second.proxy, "Proxy");
+  assert.equal(second.override["additional-prefix"], "[second] ");
+  assert.deepEqual(JSON.parse(JSON.stringify(first["health-check"])), {
+    enable: true, url: "https://www.gstatic.com/generate_204", interval: 3600,
+    lazy: false, timeout: 2500,
+  });
+});
+
+test("filters provider names by whitelist, blacklist and first matching region after the source prefix", () => {
+  const main = loadMain();
+  const config = makeConfig(["US-local", "JP-local"]);
+  addProviders(config);
+  main(config, "nozomi");
+  const names = [
+    "[三毛] JP-02", "[三毛] US-01", "[三毛] 香港-01", "[三毛] JP-US Relay",
+    "[三毛] US-IPv6", "[三毛] RUSSIA-01", "[三毛] UK-01", "[三毛] SG-01",
+    "[US.JP+IPv6] 日本-01", "[US.JP+IPv6] us-02", "[US.JP+IPv6] DE-01",
+    "[US.JP+IPv6] 韩国-01", "[三毛] AUS-01", "[三毛] USAGE-01", "[三毛] (US) 03",
+    "[三毛] 香港 US-04", "[三毛] JP-IPv6", "[USxJPIPv6] US-01",
+  ];
+  assert.deepEqual(providerNodeNames(getGroup(config, "Proxy"), names), [
+    names[0], names[1], names[2], names[3], names[6], names[8], names[9], names[11], names[14], names[15],
+  ]);
+  assert.deepEqual(providerNodeNames(getGroup(config, "JP"), names), [names[0], names[3], names[8]]);
+  assert.deepEqual(providerNodeNames(getGroup(config, "US"), names), [names[1], names[9], names[14]]);
+  // 导入节点保留来源顺序，不与显式订阅节点交叉重排。
+  assert.deepEqual(Array.from(getGroup(config, "US").proxies), ["US-local"]);
+});
+
+test("supports an empty whitelist and applies blacklist before whitelist to providers", () => {
+  for (const main of [loadMain({ whitelist: false }), loadMainWithWhitelist([{ keywords: ["ipv6"], codes: ["US"] }])]) {
+    const config = makeConfig([]);
+    addProviders(config);
+    main(config, "nozomi");
+    const names = ["[三毛] US-IPv6", "[三毛] US-01", "[三毛] DE-01"];
+    assert.deepEqual(providerNodeNames(getGroup(config, "US"), names), [names[1]]);
+    assert.ok(!providerNodeNames(getGroup(config, "Proxy"), names).includes(names[0]));
+  }
+  const config = makeConfig([]);
+  addProviders(config);
+  loadMain({ whitelist: false })(config, "nozomi");
+  assert.deepEqual(providerNodeNames(getGroup(config, "Proxy"), ["[三毛] DE-01"]), ["[三毛] DE-01"]);
+});
+
+test("creates provider-only regional groups and rejects when no nodes match", () => {
+  for (const omitProxies of [false, true]) {
+    const config = makeConfig([]);
+    if (omitProxies) delete config.proxies;
+    addProviders(config);
+    loadMain()(config, "nozomi");
+    for (const name of ["US", "JP"]) {
+      const group = getGroup(config, name);
+      assert.equal(group.type, "url-test");
+      assert.deepEqual(Array.from(group.proxies), []);
+      assert.equal(group["empty-fallback"], "REJECT");
+      assert.deepEqual(providerNodeNames(group, ["[三毛] 香港-01", "[三毛] IPv6"]), []);
+    }
+    assert.deepEqual(Array.from(getGroup(config, "AI").proxies), ["Proxy", "US", "JP"]);
+  }
+});
+
+test("keeps implicit main subscription nodes when the selector uses include-all", () => {
+  for (const field of ["include-all", "include-all-proxies"]) {
+    const config = makeConfig(["US-local", "JP-local", "JP-IPv6"]);
+    const group = getGroup(config, "Proxy");
+    group.proxies = ["DIRECT"];
+    group[field] = true;
+    addProviders(config);
+    loadMain()(config, "nozomi");
+    assert.deepEqual(Array.from(group.proxies), ["DIRECT", "JP-local", "US-local"]);
+    assert.equal(group[field], undefined);
+  }
+});
+
+test("does not backtrack to a shorter source prefix during region matching", () => {
+  const config = makeConfig([]);
+  addProviders(config);
+  config["proxy-providers"].sanmao.override["additional-prefix"] = "[source] ";
+  config["proxy-providers"].second.override["additional-prefix"] = "[source] US ";
+  loadMain()(config, "nozomi");
+  const names = ["[source] US DE-01", "[source] US JP-01", "[source] US US-01"];
+  assert.deepEqual(providerNodeNames(getGroup(config, "Proxy"), names), [names[1], names[2]]);
+  assert.deepEqual(providerNodeNames(getGroup(config, "US"), names), [names[2]]);
+});
+
+test("treats source prefix punctuation literally without creating Mihomo filter separators", () => {
+  const config = makeConfig([]);
+  addProviders(config);
+  const prefix = "[source`]+(x)?\\ ";
+  config["proxy-providers"].sanmao.override["additional-prefix"] = prefix;
+  loadMain()(config, "nozomi");
+  const group = getGroup(config, "US");
+  assert.equal(group.filter.includes("`"), false);
+  assert.deepEqual(providerNodeNames(group, [`${prefix}US-01`, "source US-02"]), [`${prefix}US-01`]);
 });

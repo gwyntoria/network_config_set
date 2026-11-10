@@ -3,6 +3,12 @@
  *
  * 通常只需修改下列常量，不要改动后面的处理函数：
  *
+ * 外部订阅在 extend-config.yaml 的 proxy-providers 中配置，链接和来源前缀只维护在 YAML。
+ * 将该 YAML 用作全局扩展配置，并配合本脚本使用；空 proxy-providers 不启用外部导入。
+ * 所有 provider 会接入当前主代理组和 US、JP；不导入外部规则或策略组。
+ * 默认直连下载、每天更新、每小时测速。更新失败时由内核保留已有缓存。
+ * 外部节点沿用下列黑白名单和地区识别，但保留 provider 返回顺序。
+ *
  * - profilePolicyMap：profile 名称到代理组名称的精确映射。
  * - proxyPolicyCandidates：映射未命中时使用的代理组候选名称，越靠前越优先。
  * - proxyRegions：订阅节点的地区排序定义，越靠前排序优先级越高；未匹配的节点按原顺序排在后面，不按地区筛选。keywords 使用不区分大小写的子串匹配，codes 只匹配两侧不紧邻英文字母的地区代码。
@@ -24,7 +30,8 @@
  * 规则顺序为 directRules、directRuleProviderNames、rejectRuleProviderNames、
  * aiRuleProviderNames、tiktokRuleProviderNames、proxyRuleProviderNames、
  * proxyRulePrefixes、订阅原规则，
- * Mihomo 按首条匹配规则执行。节点筛选和排序只处理 config.proxies 中的真实订阅节点，
+ * Mihomo 按首条匹配规则执行。脚本直接筛选和排序 config.proxies 中的真实订阅节点，
+ * 外部节点由内核按脚本生成的 filter 筛选，来源前缀不参与节点名称匹配。
  * DIRECT、REJECT 以及其他代理组引用会保留在原位置。上述列表中的 name 仅用于标注，
  * 不参与匹配。
  */
@@ -447,10 +454,109 @@ function shouldKeepProxyName(proxyName) {
   );
 }
 
-function ensureRegionProxyGroups(config) {
-  if (!Array.isArray(config.proxies)) return;
+/** 配置原生订阅下载和测速；保留 YAML 中的下载出口、更新周期和来源前缀。 */
+function prepareProxyProviders(config) {
+  const providers = config["proxy-providers"] || {};
+  const names = Object.keys(providers).filter((name) => {
+    return providers[name] && typeof providers[name] === "object";
+  });
 
-  const keptProxyNames = config.proxies
+  for (const name of names) {
+    const provider = providers[name];
+    if (provider.interval === undefined) provider.interval = 86400;
+    if (provider.proxy === undefined) provider.proxy = "DIRECT";
+    provider.override = {
+      "additional-prefix": `[${name}] `,
+      ...provider.override,
+    };
+    // use 引入的节点不由代理组的 url 字段测速，必须启用 provider 自身的检测。
+    provider["health-check"] = {
+      ...provider["health-check"],
+      enable: true,
+      url: "https://www.gstatic.com/generate_204",
+      interval: 3600,
+      lazy: false,
+    };
+  }
+
+  return names;
+}
+
+function escapeRegex(value) {
+  // Mihomo 用反引号分隔多个筛选式，字面量反引号必须写为十六进制转义。
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/`/g, "\\x60");
+}
+
+/** 从名称当前位置开始匹配规则，保留 codes 两侧不紧邻英文字母的约束。 */
+function buildProxyNameRulePattern(rules) {
+  const patterns = [];
+  for (const rule of rules) {
+    for (const keyword of rule.keywords || []) {
+      patterns.push(`[\\s\\S]*${escapeRegex(keyword)}`);
+    }
+    for (const code of rule.codes || []) {
+      patterns.push(`(?:[\\s\\S]*[^a-z])?${escapeRegex(code)}(?![a-z])`);
+    }
+  }
+  return patterns.length > 0 ? `(?:${patterns.join("|")})` : "(?!)";
+}
+
+/**
+ * 生成 Mihomo regexp2 筛选式，在来源前缀之后匹配原始节点名。
+ * 断言同时约束黑白名单和地区；较早地区优先，与 getProxyRegion 一致。
+ * filter 仅作用于 use 引入的节点，显式 proxies 中的组引用不受影响。
+ */
+function buildProviderFilter(config, providerNames, regionId) {
+  const prefixes = Array.from(new Set(providerNames.map((name) => {
+    return escapeRegex(config["proxy-providers"][name].override["additional-prefix"]);
+  }))).sort((left, right) => right.length - left.length);
+  // 前缀重叠时只消费最长前缀，禁止断言失败后回退并把来源文字当成节点名。
+  const prefixPattern = prefixes.map((prefix, index) => {
+    const longer = prefixes.slice(0, index);
+    return longer.length > 0 ? `(?!${longer.join("|")})${prefix}` : prefix;
+  }).join("|");
+  let pattern = `(?i)^(?:${prefixPattern})`;
+  if (includedProxyNameRules.length > 0) {
+    pattern += `(?=${buildProxyNameRulePattern(includedProxyNameRules)})`;
+  }
+  if (excludedProxyNameRules.length > 0) {
+    pattern += `(?!${buildProxyNameRulePattern(excludedProxyNameRules)})`;
+  }
+  if (regionId) {
+    const regionIndex = proxyRegions.findIndex((region) => region.id === regionId);
+    pattern += `(?=${buildProxyNameRulePattern([proxyRegions[regionIndex]])})`;
+    if (regionIndex > 0) {
+      pattern += `(?!${buildProxyNameRulePattern(proxyRegions.slice(0, regionIndex))})`;
+    }
+  }
+  return `${pattern}[\\s\\S]*$`;
+}
+
+/** 接入当前主代理组，追加 use 时去重，保留原有显式节点和策略组引用。 */
+function attachProxyProviders(config, profileName, providerNames) {
+  if (providerNames.length === 0) return;
+  const policy = resolveProxyPolicy(config, profileName);
+  const group = getProxyGroups(config).find((group) => group && group.name === policy);
+  if (!group) {
+    console.warn("[clash-verge] No main proxy group found. External providers were not attached to a main group.");
+    return;
+  }
+  // filter 也会筛选 include-all-proxies 引入的节点，先展开为显式节点以保留主订阅。
+  if (group["include-all"] || group["include-all-proxies"]) {
+    group.proxies = Array.from(new Set([...(group.proxies || []), ...getProxyNameSet(config)]));
+  }
+  group.use = Array.from(new Set([...(group.use || []), ...providerNames]));
+  group.filter = buildProviderFilter(config, providerNames);
+  // include-all-providers 会使 use 失效，禁用它以遵循明确列出的来源。
+  delete group["include-all-providers"];
+  delete group["include-all"];
+  delete group["include-all-proxies"];
+}
+
+function ensureRegionProxyGroups(config, providerNames) {
+  if (!Array.isArray(config.proxies) && providerNames.length === 0) return;
+
+  const keptProxyNames = (config.proxies || [])
     .map(getProxyName)
     .filter(Boolean)
     .filter((proxyName) => shouldKeepProxyName(proxyName));
@@ -465,7 +571,7 @@ function ensureRegionProxyGroups(config) {
       return region && region.id === regionGroup.regionId;
     });
 
-    if (regionProxyNames.length === 0) {
+    if (regionProxyNames.length === 0 && providerNames.length === 0) {
       removedGroupNames.add(regionGroup.name);
       console.warn(
         `[clash-verge] No ${regionGroup.name} proxy nodes found. ${regionGroup.name} group was skipped.`,
@@ -488,6 +594,18 @@ function ensureRegionProxyGroups(config) {
       tolerance: 0,
       proxies: regionProxyNames,
     };
+
+    if (providerNames.length > 0) {
+      nextGroup.use = providerNames.slice();
+      nextGroup.filter = buildProviderFilter(config, providerNames, regionGroup.regionId);
+      nextGroup["empty-fallback"] = "REJECT";
+      // 地区组只允许显式地区节点和通过地区筛选的 provider 节点。
+      delete nextGroup["include-all"];
+      delete nextGroup["include-all-providers"];
+      delete nextGroup["include-all-proxies"];
+      delete nextGroup["exclude-filter"];
+      delete nextGroup["exclude-type"];
+    }
 
     // 原手动选择组不需要延迟检测字段，恢复 select 时同时恢复以下逻辑。
     // delete nextGroup.url;
@@ -655,7 +773,9 @@ function applyDnsOverrides(config) {
 function main(config, profileName) {
   applyDnsOverrides(config);
   removeProxyGroup(config, "OpenAI");
-  ensureRegionProxyGroups(config);
+  const providerNames = prepareProxyProviders(config);
+  attachProxyProviders(config, profileName, providerNames);
+  ensureRegionProxyGroups(config, providerNames);
   ensureSelectProxyGroup(
     config,
     profileName,
