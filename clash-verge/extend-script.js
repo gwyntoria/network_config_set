@@ -14,7 +14,7 @@
  * - proxyRegions：订阅节点的地区排序定义，越靠前排序优先级越高；未匹配的节点按原顺序排在后面，不按地区筛选。keywords 使用不区分大小写的子串匹配，codes 只匹配两侧不紧邻英文字母的地区代码。
  * - excludedProxyNameRules：订阅节点黑名单，匹配方式同上；命中后一定移除。空数组表示不排除任何节点。
  * - includedProxyNameRules：订阅节点白名单，匹配方式同上；非空时只保留命中的订阅节点，空数组表示不限制。当前保留香港、美国、日本、韩国和英国节点，黑名单优先于白名单。
- * - regionProxyGroups：美国、日本节点专用代理组，只包含对应地区的订阅节点，每小时测速并自动选择低延迟节点。
+ * - regionProxyGroups：美国、日本节点专用代理组，只包含对应地区的订阅节点，手动选择节点。
  * - aiProxyGroup：AI 专用代理组，在当前 profile 的普通代理组和 US、JP 之间手动选择。
  * - aiRuleProviderNames：强制使用 AI 代理组的 rule-provider 名称，必须与合并配置中的名称完全一致。
  * - tiktokProxyGroup：TikTok 专用代理组，选项与 AI 代理组相同。
@@ -144,7 +144,7 @@ const includedProxyNameRules = [
   },
 ];
 
-// 地区自动选择组：regionId 对应 proxyRegions 中的 id，只包含该地区的真实订阅节点。
+// 地区手动选择组：regionId 对应 proxyRegions 中的 id，只包含该地区的真实订阅节点。
 const regionProxyGroups = [
   { name: "US", regionId: "US" },
   { name: "JP", regionId: "JP" },
@@ -206,46 +206,13 @@ const tiktokRuleProviderNames = ["TikTok"];
 
 // 需要强制直连的规则放在这里，避免国内服务、办公软件和支付场景误走代理。
 const directRules = [
-  // --- 微信 / WeChat: Windows ---
-  `PROCESS-NAME,Weixin.exe,DIRECT`,
-  `PROCESS-NAME,WeChat.exe,DIRECT`,
-  `PROCESS-NAME,WeChatAppEx.exe,DIRECT`,
-
-  // --- 微信 / WeChat: macOS ---
-  `PROCESS-NAME,Weixin,DIRECT`,
-  `PROCESS-NAME,WeChat,DIRECT`,
-
-  // --- 钉钉 / DingTalk: Windows ---
-  `PROCESS-NAME,DingTalk.exe,DIRECT`,
-
-  // --- 钉钉 / DingTalk: macOS ---
-  `PROCESS-NAME,DingTalk,DIRECT`,
-
-  // --- 微信域名 ---
-  `DOMAIN-SUFFIX,wechat.com,DIRECT`,
-  `DOMAIN-SUFFIX,weixin.qq.com,DIRECT`,
-  `DOMAIN-SUFFIX,weixin.com,DIRECT`,
-  `DOMAIN-SUFFIX,servicewechat.com,DIRECT`,
-  `DOMAIN-SUFFIX,wx.qq.com,DIRECT`,
-  `DOMAIN-SUFFIX,gtimg.com,DIRECT`,
-  `DOMAIN-SUFFIX,qpic.cn,DIRECT`,
-  `DOMAIN-SUFFIX,qlogo.cn,DIRECT`,
-  `DOMAIN-SUFFIX,tenpay.com,DIRECT`,
-  `DOMAIN-SUFFIX,wechatpay.com,DIRECT`,
-
-  // --- 钉钉域名 ---
-  `DOMAIN-SUFFIX,dingtalk.com,DIRECT`,
-  `DOMAIN-SUFFIX,dingtalkapps.com,DIRECT`,
-  `DOMAIN-SUFFIX,alicdn.com,DIRECT`,
-  `DOMAIN-SUFFIX,aliyuncs.com,DIRECT`,
-  `DOMAIN-SUFFIX,mxhichina.com,DIRECT`,
-  `DOMAIN-SUFFIX,mmstat.com,DIRECT`,
+  // `DOMAIN-SUFFIX,dingtalk.com,DIRECT`
 ];
 
 // 需要强制走代理的规则放在这里，策略组统一使用当前 profile 解析出的 proxyPolicy。
 const proxyRulePrefixes = [
   // --- 其他代理规则 ---
-  // 示例："DOMAIN-SUFFIX,example.com"
+  // "DOMAIN-SUFFIX,example.com"
 ];
 
 function buildProxyRules(proxyPolicy) {
@@ -586,14 +553,8 @@ function ensureRegionProxyGroups(config, providerNames) {
     const nextGroup = {
       ...oldGroup,
       name: regionGroup.name,
-      type: "select", // 原手动选择方式，保留以便恢复。
-
-      // type: "url-test",
-      // url: "https://www.gstatic.com/generate_204",
-      // interval: 3600,
-      // lazy: false, // 未使用该组时也按间隔测速。
-      // tolerance: 0,
-      // proxies: regionProxyNames,
+      type: "select",
+      proxies: regionProxyNames,
     };
 
     if (providerNames.length > 0) {
@@ -608,11 +569,11 @@ function ensureRegionProxyGroups(config, providerNames) {
       delete nextGroup["exclude-type"];
     }
 
-    // 原手动选择组不需要延迟检测字段，恢复 select 时同时恢复以下逻辑。
-    // delete nextGroup.url;
-    // delete nextGroup.interval;
-    // delete nextGroup.lazy;
-    // delete nextGroup.tolerance;
+    // 手动选择组不需要延迟检测字段，清理原地区组可能残留的配置。
+    delete nextGroup.url;
+    delete nextGroup.interval;
+    delete nextGroup.lazy;
+    delete nextGroup.tolerance;
 
     if (oldGroup) {
       groups[groups.indexOf(oldGroup)] = nextGroup;

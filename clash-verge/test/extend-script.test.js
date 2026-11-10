@@ -188,7 +188,7 @@ test("keeps only the configured whitelist regions", () => {
   assert.deepEqual(Array.from(getGroup(config, "US").proxies), ["US-01"]);
 });
 
-test("creates US and JP groups with hourly automatic latency selection", () => {
+test("creates US and JP manual selectors with original profile nodes", () => {
   const main = loadMain();
   const config = makeConfig(["US-01", "JP-01", "US-02", "JP-02", "JP-IPv6"]);
 
@@ -201,12 +201,12 @@ test("creates US and JP groups with hourly automatic latency selection", () => {
     const group = getGroup(config, groupName);
 
     assert.ok(group);
-    assert.equal(group.type, "url-test");
+    assert.equal(group.type, "select");
     assert.deepEqual(Array.from(group.proxies), proxyNames);
-    assert.equal(group.url, "https://www.gstatic.com/generate_204");
-    assert.equal(group.interval, 3600);
-    assert.equal(group.lazy, false);
-    assert.equal(group.tolerance, 0);
+    assert.equal(group.url, undefined);
+    assert.equal(group.interval, undefined);
+    assert.equal(group.lazy, undefined);
+    assert.equal(group.tolerance, undefined);
   }
 });
 
@@ -223,11 +223,11 @@ test("replaces existing regional settings and removes groups without eligible no
   main(config, "UNKNOWN");
 
   const us = getGroup(config, "US");
-  assert.equal(us.type, "url-test");
-  assert.equal(us.url, "https://www.gstatic.com/generate_204");
-  assert.equal(us.interval, 3600);
-  assert.equal(us.lazy, false);
-  assert.equal(us.tolerance, 0);
+  assert.equal(us.type, "select");
+  assert.equal(us.url, undefined);
+  assert.equal(us.interval, undefined);
+  assert.equal(us.lazy, undefined);
+  assert.equal(us.tolerance, undefined);
   assert.deepEqual(Array.from(us.proxies), ["US-01"]);
   assert.equal(getGroup(config, "JP"), undefined);
 });
@@ -570,7 +570,7 @@ test("creates provider-only regional groups and rejects when no nodes match", ()
     loadMain()(config, "nozomi");
     for (const name of ["US", "JP"]) {
       const group = getGroup(config, name);
-      assert.equal(group.type, "url-test");
+      assert.equal(group.type, "select");
       assert.deepEqual(Array.from(group.proxies), []);
       assert.equal(group["empty-fallback"], "REJECT");
       assert.deepEqual(providerNodeNames(group, ["[三毛] 香港-01", "[三毛] IPv6"]), []);
