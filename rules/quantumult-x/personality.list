@@ -8,11 +8,12 @@ HOST-SUFFIX,dedao.com,direct
 HOST-SUFFIX,linuxdo.org,direct
 
 # airport
-HOST-SUFFIX,just.adomainforsub.org,direct
-HOST-SUFFIX,43fc4b81.ghelper.me,direct
-HOST-SUFFIX,43fc4b81.ghv.app,direct
+HOST-SUFFIX,just.adomainforsub.org,proxy
+HOST-SUFFIX,ghelper.net,proxy
+HOST-SUFFIX,ghelper.me,proxy
+HOST-SUFFIX,ghv.app,proxy
 
-# proxy
+# jable
 HOST-SUFFIX,mushroomtrack.com,proxy
 
 # JYP Bubble (Dear U)
