@@ -1,6 +1,6 @@
 # NAME: Personality
 # SOURCE: https://github.com/gwyntoria/network_config_set/blob/main/rules/quantumult-x/personality.list
-# UPDATED: 2026-10-27
+# UPDATED: 2026-11-11
 
 # direct
 HOST-SUFFIX,caixin.com,direct
