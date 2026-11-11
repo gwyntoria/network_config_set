@@ -28,8 +28,8 @@
 
 | 路径 | 用途 |
 | --- | --- |
-| [extend-script.js](clash-verge/extend-script.js) | Clash Verge Rev 全局扩展脚本 |
-| [rule-providers.yaml](clash-verge/rule-providers.yaml) | 扩展脚本依赖的 `rule-providers` 配置片段 |
+| [extend-script.js](clash-verge/extend-script.js) | Clash Verge Rev 扩展脚本 |
+| [extend-config.yaml](clash-verge/extend-config.yaml) | 扩展脚本依赖的 `rule-providers` 和 `proxy-providers` 配置段 |
 
 ### 测试文件
 

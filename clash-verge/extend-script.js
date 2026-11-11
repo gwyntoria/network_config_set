@@ -185,16 +185,16 @@ const dnsOverrides = {
     "www.msftconnecttest.com",
   ],
   "nameserver": [
-    "https://doh.pub/dns-query",
-    "https://dns.alidns.com/dns-query",
+    "https://223.5.5.5/dns-query",
+    "https://223.6.6.6/dns-query",
   ],
   "proxy-server-nameserver": [
-    "https://doh.pub/dns-query",
-    "https://dns.alidns.com/dns-query",
+    "https://223.5.5.5/dns-query",
+    "https://223.6.6.6/dns-query",
   ],
   "fallback": [
-    "https://doh.pub/dns-query",
-    "https://dns.alidns.com/dns-query",
+    "https://223.5.5.5/dns-query",
+    "https://223.6.6.6/dns-query",
   ],
 };
 

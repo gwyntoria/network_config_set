@@ -419,11 +419,11 @@ test("overrides managed DNS settings and preserves other fields", () => {
       "*.msftncsi.com",
       "www.msftconnecttest.com",
     ],
-    nameserver: ["https://doh.pub/dns-query", "https://dns.alidns.com/dns-query"],
+    nameserver: ["https://223.5.5.5/dns-query", "https://223.6.6.6/dns-query"],
     "proxy-server-nameserver": [
-      "https://doh.pub/dns-query", "https://dns.alidns.com/dns-query",
+      "https://223.5.5.5/dns-query", "https://223.6.6.6/dns-query",
     ],
-    fallback: ["https://doh.pub/dns-query", "https://dns.alidns.com/dns-query"],
+    fallback: ["https://223.5.5.5/dns-query", "https://223.6.6.6/dns-query"],
   };
 
   main(config, "UNKNOWN");
