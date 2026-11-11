@@ -7,6 +7,11 @@ HOST-SUFFIX,caixin.com,direct
 HOST-SUFFIX,dedao.com,direct
 HOST-SUFFIX,linuxdo.org,direct
 
+# airport
+HOST-SUFFIX,just.adomainforsub.org,direct
+HOST-SUFFIX,43fc4b81.ghelper.me,direct
+HOST-SUFFIX,43fc4b81.ghv.app,direct
+
 # proxy
 HOST-SUFFIX,mushroomtrack.com,proxy
 
