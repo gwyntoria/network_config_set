@@ -1,0 +1,32 @@
+# 核心原则：将这些直连规则前置，按从上到下首条命中的规则执行。
+# DOMAIN-SUFFIX 匹配指定域名及其子域名；DIRECT 表示直连。
+prepend:
+  # 沉浸式翻译的指定服务域名。
+  - 'DOMAIN-SUFFIX,ai.immersivetranslate.com,DIRECT'
+  - 'DOMAIN-SUFFIX,config.immersivetranslate.com,DIRECT'
+  - 'DOMAIN-SUFFIX,analytics.immersivetranslate.com,DIRECT'
+
+  # 其他需要直连的指定域名。
+  - 'DOMAIN-SUFFIX,caixin.com,DIRECT'
+  - 'DOMAIN-SUFFIX,dedao.com,DIRECT'
+  - 'DOMAIN-SUFFIX,plebvps.com,DIRECT'
+  - 'DOMAIN-SUFFIX,cmhuawei.com,DIRECT'
+  - 'DOMAIN-SUFFIX,los.cdnkuaishou.com,DIRECT'
+
+  # 本地网络常用域名后缀。
+  - 'DOMAIN-SUFFIX,lan,DIRECT'
+  - 'DOMAIN-SUFFIX,local,DIRECT'
+  - 'DOMAIN-SUFFIX,localhost,DIRECT'
+
+  # 本地、私有及特殊用途地址。
+  # no-resolve 表示不为匹配本条 IP 规则主动解析域名。
+  - 'IP-CIDR,0.0.0.0/8,DIRECT,no-resolve' # 当前网络地址段。
+  - 'IP-CIDR,10.0.0.0/8,DIRECT,no-resolve' # 私有地址。
+  - 'IP-CIDR,192.168.0.0/16,DIRECT,no-resolve' # 私有地址。
+  - 'IP-CIDR,172.16.0.0/12,DIRECT,no-resolve' # 私有地址。
+  - 'IP-CIDR,198.18.0.0/16,DIRECT,no-resolve' # 基准测试地址范围的一部分，亦常用于 Fake-IP。
+  - 'IP-CIDR,100.64.0.0/10,DIRECT,no-resolve' # 运营商级 NAT 共享地址。
+  - 'IP-CIDR,127.0.0.0/8,DIRECT,no-resolve' # IPv4 回环地址。
+  - 'IP-CIDR,169.254.0.0/16,DIRECT,no-resolve' # IPv4 链路本地地址。
+  - 'IP-CIDR,224.0.0.0/4,DIRECT,no-resolve' # IPv4 组播地址。
+  - 'IP-CIDR6,::1/128,DIRECT,no-resolve' # IPv6 回环地址。
