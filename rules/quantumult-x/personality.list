@@ -7,6 +7,12 @@ HOST-SUFFIX,caixin.com,direct
 HOST-SUFFIX,dedao.com,direct
 HOST-SUFFIX,linuxdo.org,direct
 
+# huawei
+HOST-SUFFIX,cmhuawei.com,DIRECT
+HOST-SUFFIX,cdnhuawei.com,DIRECT
+HOST-SUFFIX,viphuawei.com,DIRECT
+HOST-SUFFIX,iphuawei.com,DIRECT
+
 # airport
 HOST-SUFFIX,just.adomainforsub.org,proxy
 HOST-SUFFIX,ghelper.net,proxy

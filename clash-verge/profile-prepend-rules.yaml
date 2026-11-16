@@ -6,11 +6,16 @@ prepend:
   - 'DOMAIN-SUFFIX,config.immersivetranslate.com,DIRECT'
   - 'DOMAIN-SUFFIX,analytics.immersivetranslate.com,DIRECT'
 
+  # huawei
+  - DOMAIN-SUFFIX,cmhuawei.com,DIRECT
+  - DOMAIN-SUFFIX,cdnhuawei.com,DIRECT
+  - DOMAIN-SUFFIX,viphuawei.com,DIRECT
+  - DOMAIN-SUFFIX,iphuawei.com,DIRECT
+
   # 其他需要直连的指定域名。
   - 'DOMAIN-SUFFIX,caixin.com,DIRECT'
   - 'DOMAIN-SUFFIX,dedao.com,DIRECT'
   - 'DOMAIN-SUFFIX,plebvps.com,DIRECT'
-  - 'DOMAIN-SUFFIX,cmhuawei.com,DIRECT'
   - 'DOMAIN-SUFFIX,los.cdnkuaishou.com,DIRECT'
 
   # 本地网络常用域名后缀。
