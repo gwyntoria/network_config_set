@@ -1,22 +1,22 @@
 # 核心原则：将这些直连规则前置，按从上到下首条命中的规则执行。
 # DOMAIN-SUFFIX 匹配指定域名及其子域名；DIRECT 表示直连。
 prepend:
-  # 沉浸式翻译的指定服务域名。
-  - 'DOMAIN-SUFFIX,ai.immersivetranslate.com,DIRECT'
-  - 'DOMAIN-SUFFIX,config.immersivetranslate.com,DIRECT'
-  - 'DOMAIN-SUFFIX,analytics.immersivetranslate.com,DIRECT'
-
-  # huawei
-  - DOMAIN-SUFFIX,cmhuawei.com,DIRECT
-  - DOMAIN-SUFFIX,cdnhuawei.com,DIRECT
-  - DOMAIN-SUFFIX,viphuawei.com,DIRECT
-  - DOMAIN-SUFFIX,iphuawei.com,DIRECT
-
-  # 其他需要直连的指定域名。
   - 'DOMAIN-SUFFIX,caixin.com,DIRECT'
   - 'DOMAIN-SUFFIX,dedao.com,DIRECT'
+  - 'DOMAIN-SUFFIX,linuxdo.org,DIRECT'
+  - 'DOMAIN-SUFFIX,immersivetranslate.com,DIRECT'
+
+  # ghelper
+  - 'DOMAIN-SUFFIX,sv.plebai.net,DIRECT'
   - 'DOMAIN-SUFFIX,plebvps.com,DIRECT'
-  - 'DOMAIN-SUFFIX,los.cdnkuaishou.com,DIRECT'
+  - 'DOMAIN-SUFFIX,gotochinatown.net,DIRECT'
+  - 'DOMAIN-SUFFIX,oshuawei.com,DIRECT'
+  - 'DOMAIN-SUFFIX,hyhuawei.com,DIRECT'
+  - 'DOMAIN-SUFFIX,cdnhuawei.com,DIRECT'
+  - 'DOMAIN-SUFFIX,cmhuawei.com,DIRECT'
+  - 'DOMAIN-SUFFIX,viphuawei.com,DIRECT'
+  - 'DOMAIN-SUFFIX,iphuawei.com,DIRECT'
+  - 'DOMAIN-SUFFIX,cdnkuaishou.com,DIRECT'
 
   # 本地网络常用域名后缀。
   - 'DOMAIN-SUFFIX,lan,DIRECT'
