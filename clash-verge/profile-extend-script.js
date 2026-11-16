@@ -22,12 +22,9 @@
  * - rejectRuleProviderNames：使用 REJECT 策略的 rule-provider 名称。
  * - directRuleProviderNames：使用 DIRECT 策略的 rule-provider 名称。
  * - proxyRuleProviderNames：使用当前 profile 代理策略的 rule-provider 名称。
- * - directRules：强制直连的完整 Mihomo 规则，每条规则必须包含末尾的 DIRECT。
- * - proxyRulePrefixes：强制代理的 Mihomo 规则前缀，不要填写末尾策略组，脚本会根据 profile 自动补上解析出的代理组名称。
  *
- * 规则顺序为 directRules、directRuleProviderNames、rejectRuleProviderNames、
- * aiRuleProviderNames、tiktokRuleProviderNames、proxyRuleProviderNames、
- * proxyRulePrefixes、订阅原规则，
+ * 规则顺序为 directRuleProviderNames、rejectRuleProviderNames、
+ * aiRuleProviderNames、tiktokRuleProviderNames、proxyRuleProviderNames、订阅原规则，
  * Mihomo 按首条匹配规则执行。脚本只筛选和排序代理组中的真实订阅节点引用，不删除 config.proxies 中的节点定义，
  * 外部节点由内核按脚本生成的 filter 筛选，来源前缀不参与节点名称匹配。
  * DIRECT、REJECT 以及其他代理组引用会保留在原位置。上述列表中的 name 仅用于标注，
@@ -157,23 +154,6 @@ const proxyRuleProviderNames = ["GameProxy", "PayPal"];
 const aiRuleProviderNames = ["OpenAI", "Gemini", "Anthropic"];
 const tiktokRuleProviderNames = ["TikTok"];
 
-// 需要强制直连的规则放在这里，避免国内服务、办公软件和支付场景误走代理。
-const directRules = [
-  // `DOMAIN-SUFFIX,dingtalk.com,DIRECT`
-];
-
-// 需要强制走代理的规则放在这里，策略组统一使用当前 profile 解析出的 proxyPolicy。
-const proxyRulePrefixes = [
-  // --- 其他代理规则 ---
-  // "DOMAIN-SUFFIX,example.com"
-];
-
-function buildProxyRules(proxyPolicy) {
-  if (!proxyPolicy) return [];
-
-  return proxyRulePrefixes.map((rule) => `${rule},${proxyPolicy}`);
-}
-
 function buildProxyGroupRuleProviderRules(config, providerNames, groupName) {
   if (!getProxyGroupNames(config).includes(groupName)) return [];
 
@@ -284,16 +264,12 @@ function mergeProxyRules(config, profileName) {
     );
   }
 
-  const proxyRules = buildProxyRules(proxyPolicy);
-
   config.rules = uniqueRules(
-    directRules
-      .concat(buildDirectRuleProviderRules())
+    buildDirectRuleProviderRules()
       .concat(buildRejectRules())
       .concat(buildAiProxyRules(config))
       .concat(buildTikTokProxyRules(config))
       .concat(buildProxyRuleProviderRules(proxyPolicy))
-      .concat(proxyRules)
       .concat(oldRules),
   );
 }
