@@ -34,13 +34,6 @@
 | [profile-extend-script.js](clash-verge/profile-extend-script.js) | 当前 profile 的节点整理、策略组和规则合并 |
 | [profile-prepend-rules.yaml](clash-verge/profile-prepend-rules.yaml) | 当前 profile 的自定义 rule |
 
-### 测试文件
-
-| 路径 | 用途 |
-| --- | --- |
-| [extend-script.test.js](clash-verge/test/extend-script.test.js) | 两层扩展脚本的回归测试 |
-| [provider-runtime.test.js](clash-verge/test/provider-runtime.test.js) | 可选的 Mihomo 外部节点集成测试 |
-
 ## 使用说明
 
 ### Clash/Mihomo 规则
@@ -113,14 +106,6 @@ TikTok 规则
 ```
 
 Mihomo 使用首条命中的规则，修改这些列表时需保留所需的优先级。
-
-### 测试
-
-扩展脚本测试使用 Node.js 内置的测试运行器，不需要安装第三方依赖：
-
-```bash
-node --test clash-verge/test/*.test.js
-```
 
 ## 规则参考来源
 
