@@ -232,13 +232,13 @@ test("replaces existing regional settings and removes groups without eligible no
   assert.equal(getGroup(config, "JP"), undefined);
 });
 
-test("creates AI and TikTok groups with proxy and region choices", () => {
+test("creates AI, TikTok and YouTube groups with proxy and region choices", () => {
   const main = loadMain();
   const config = makeConfig(["US-01", "JP-01"]);
 
   main(config, "UNKNOWN");
 
-  for (const groupName of ["AI", "TikTok"]) {
+  for (const groupName of ["AI", "TikTok", "YouTube"]) {
     const group = getGroup(config, groupName);
 
     assert.ok(group);
@@ -250,10 +250,12 @@ test("creates AI and TikTok groups with proxy and region choices", () => {
     ]);
   }
 
+  const groupNames = config["proxy-groups"].map((group) => group.name);
+  assert.equal(groupNames.indexOf("YouTube"), groupNames.indexOf("TikTok") + 1);
   assert.equal(config["proxy-groups"].at(-1).name, "AI");
 });
 
-test("routes AI, TikTok and PayPal rule providers to their groups", () => {
+test("routes AI, TikTok, YouTube and PayPal rule providers to their groups", () => {
   const main = loadMain();
   const config = makeConfig(["US-01", "JP-01"]);
 
@@ -264,6 +266,7 @@ test("routes AI, TikTok and PayPal rule providers to their groups", () => {
     "RULE-SET,Gemini,AI",
     "RULE-SET,Anthropic,AI",
     "RULE-SET,TikTok,TikTok",
+    "RULE-SET,YouTube,YouTube",
     "RULE-SET,PayPal,Proxy",
   ]) {
     assert.ok(config.rules.includes(rule), rule);
@@ -294,6 +297,10 @@ test("skips missing region choices and removes the legacy OpenAI group", () => {
     "Proxy",
     "US",
   ]);
+  assert.deepEqual(Array.from(getGroup(config, "YouTube").proxies), [
+    "Proxy",
+    "US",
+  ]);
 });
 
 test("places AI and TikTok rules before the general proxy providers", () => {
@@ -304,11 +311,13 @@ test("places AI and TikTok rules before the general proxy providers", () => {
 
   const aiIndex = config.rules.indexOf("RULE-SET,OpenAI,AI");
   const tiktokIndex = config.rules.indexOf("RULE-SET,TikTok,TikTok");
+  const youtubeIndex = config.rules.indexOf("RULE-SET,YouTube,YouTube");
   const paypalIndex = config.rules.indexOf("RULE-SET,PayPal,Proxy");
   const subscriptionIndex = config.rules.indexOf("MATCH,DIRECT");
 
   assert.ok(aiIndex < tiktokIndex);
-  assert.ok(tiktokIndex < paypalIndex);
+  assert.ok(tiktokIndex < youtubeIndex);
+  assert.ok(youtubeIndex < paypalIndex);
   assert.ok(paypalIndex < subscriptionIndex);
 });
 
@@ -482,6 +491,7 @@ test("accepts providers merged after the global script and keeps the complete ru
     "RULE-SET,Gemini,AI",
     "RULE-SET,Anthropic,AI",
     "RULE-SET,TikTok,TikTok",
+    "RULE-SET,YouTube,YouTube",
     "RULE-SET,GameProxy,Proxy",
     "RULE-SET,PayPal,Proxy",
     "MATCH,DIRECT",

@@ -96,24 +96,19 @@ https://raw.githubusercontent.com/gwyntoria/network_config_set/main/rules/quantu
 - `excludedProxyNameRules`：节点名称黑名单。
 - `includedProxyNameRules`：节点名称白名单。非空时只保留命中的订阅节点；黑名单优先，空数组表示不限制。
 - `aiRuleProviderNames`、`tiktokRuleProviderNames`、`rejectRuleProviderNames`、`directRuleProviderNames` 与 `proxyRuleProviderNames`：provider 的分流策略。
-- `directRules` 与 `proxyRulePrefixes`：直接插入配置的自定义规则。
 
 脚本插入规则时采用以下顺序：
 
 ```text
-直连规则
 直连 provider 规则
 广告拦截规则
 AI 规则
 TikTok 规则
 代理 provider 规则
-强制代理规则
 订阅原有规则
 ```
 
 Mihomo 使用首条命中的规则，修改这些列表时需保留所需的优先级。
-`directRules` 要包含完整策略，`proxyRulePrefixes` 只填写规则前缀，
-脚本会自动补上当前 profile 对应的代理组。
 
 ### 测试
 

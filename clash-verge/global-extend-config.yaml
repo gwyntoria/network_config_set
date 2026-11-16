@@ -24,11 +24,11 @@ rule-providers:
     interval: 86400
 
   Anthropic:
-      type: http
-      behavior: classical
-      url: "https://raw.githubusercontent.com/gwyntoria/network_config_set/refs/heads/main/rules/clash/anthropic.yaml"
-      path: ./rules/Anthropic.yaml
-      interval: 86400
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/gwyntoria/network_config_set/refs/heads/main/rules/clash/anthropic.yaml"
+    path: ./rules/Anthropic.yaml
+    interval: 86400
 
   Gemini:
     type: http
@@ -51,23 +51,16 @@ rule-providers:
     path: ./rules/TikTok.yaml
     interval: 86400
 
+  YouTube:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/YouTube/YouTube.yaml"
+    path: ./rules/YouTube.yaml
+    interval: 86400
+
   PayPal:
     type: http
     behavior: classical
     url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/PayPal/PayPal.yaml"
     path: ./rules/PayPal.yaml
-    interval: 86400
-
-  Bing:
-    type: http
-    behavior: classical
-    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Bing/Bing.yaml"
-    path: ./rules/Bing.yaml
-    interval: 86400
-
-  OneDrive:
-    type: http
-    behavior: classical
-    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/OneDrive/OneDrive.yaml"
-    path: ./rules/OneDrive.yaml
     interval: 86400

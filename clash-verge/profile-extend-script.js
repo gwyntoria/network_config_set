@@ -19,12 +19,14 @@
  * - aiRuleProviderNames：强制使用 AI 代理组的 rule-provider 名称，必须与合并配置中的名称完全一致。
  * - tiktokProxyGroup：TikTok 专用代理组，选项与 AI 代理组相同。
  * - tiktokRuleProviderNames：强制使用 TikTok 代理组的 rule-provider 名称。
+ * - youtubeProxyGroup：YouTube 专用代理组，选项为当前主代理组及可用的 US、JP。
+ * - youtubeRuleProviderNames：强制使用 YouTube 代理组的 rule-provider 名称。
  * - rejectRuleProviderNames：使用 REJECT 策略的 rule-provider 名称。
  * - directRuleProviderNames：使用 DIRECT 策略的 rule-provider 名称。
  * - proxyRuleProviderNames：使用当前 profile 代理策略的 rule-provider 名称。
  *
  * 规则顺序为 directRuleProviderNames、rejectRuleProviderNames、
- * aiRuleProviderNames、tiktokRuleProviderNames、proxyRuleProviderNames、订阅原规则，
+ * aiRuleProviderNames、tiktokRuleProviderNames、youtubeRuleProviderNames、proxyRuleProviderNames、订阅原规则，
  * Mihomo 按首条匹配规则执行。脚本只筛选和排序代理组中的真实订阅节点引用，不删除 config.proxies 中的节点定义，
  * 外部节点由内核按脚本生成的 filter 筛选，来源前缀不参与节点名称匹配。
  * DIRECT、REJECT 以及其他代理组引用会保留在原位置。上述列表中的 name 仅用于标注，
@@ -148,11 +150,17 @@ const tiktokProxyGroup = {
   type: "select",
 };
 
+const youtubeProxyGroup = {
+  name: "YouTube",
+  type: "select",
+};
+
 const rejectRuleProviderNames = ["AD"];
 const directRuleProviderNames = ["GameDirect"];
 const proxyRuleProviderNames = ["GameProxy", "PayPal"];
 const aiRuleProviderNames = ["OpenAI", "Gemini", "Anthropic"];
 const tiktokRuleProviderNames = ["TikTok"];
+const youtubeRuleProviderNames = ["YouTube"];
 
 function buildProxyGroupRuleProviderRules(config, providerNames, groupName) {
   if (!getProxyGroupNames(config).includes(groupName)) return [];
@@ -175,6 +183,14 @@ function buildTikTokProxyRules(config) {
     config,
     tiktokRuleProviderNames,
     tiktokProxyGroup.name,
+  );
+}
+
+function buildYouTubeProxyRules(config) {
+  return buildProxyGroupRuleProviderRules(
+    config,
+    youtubeRuleProviderNames,
+    youtubeProxyGroup.name,
   );
 }
 
@@ -269,6 +285,7 @@ function mergeProxyRules(config, profileName) {
       .concat(buildRejectRules())
       .concat(buildAiProxyRules(config))
       .concat(buildTikTokProxyRules(config))
+      .concat(buildYouTubeProxyRules(config))
       .concat(buildProxyRuleProviderRules(proxyPolicy))
       .concat(oldRules),
   );
@@ -683,6 +700,12 @@ function main(config, profileName) {
     profileName,
     tiktokProxyGroup,
     "[clash-verge] No proxy groups found for TikTok. TikTok rules were skipped.",
+  );
+  ensureSelectProxyGroup(
+    config,
+    profileName,
+    youtubeProxyGroup,
+    "[clash-verge] No proxy groups found for YouTube. YouTube rules were skipped.",
   );
   ensureSelectProxyGroup(
     config,
