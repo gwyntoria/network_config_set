@@ -28,14 +28,17 @@
 
 | 路径 | 用途 |
 | --- | --- |
-| [extend-script.js](clash-verge/extend-script.js) | Clash Verge Rev 扩展脚本 |
-| [extend-config.yaml](clash-verge/extend-config.yaml) | 扩展脚本依赖的 `rule-providers` 和 `proxy-providers` 配置段 |
+| [global-extend-config.yaml](clash-verge/global-extend-config.yaml) | 全局公共 `rule-providers` |
+| [global-extend-script.js](clash-verge/global-extend-script.js) | 全局 DNS、fake-ip 和 DNS 例外 |
+| [profile-extend-config.yaml](clash-verge/profile-extend-config.yaml) | 当前 profile 的外部节点 `proxy-providers` 模板 |
+| [profile-extend-script.js](clash-verge/profile-extend-script.js) | 当前 profile 的节点整理、策略组和规则合并 |
 
 ### 测试文件
 
 | 路径 | 用途 |
 | --- | --- |
-| [extend-script.test.js](clash-verge/extend-script.test.js) | 扩展脚本的回归测试 |
+| [extend-script.test.js](clash-verge/test/extend-script.test.js) | 两层扩展脚本的回归测试 |
+| [provider-runtime.test.js](clash-verge/test/provider-runtime.test.js) | 可选的 Mihomo 外部节点集成测试 |
 
 ## 使用说明
 
@@ -71,12 +74,20 @@ https://raw.githubusercontent.com/gwyntoria/network_config_set/main/rules/quantu
 
 ### Clash Verge Rev 扩展脚本
 
-1. 将 `rule-providers.yaml` 复制到*全局拓展配置*。
-2. 将 `extend-script.js` 复制到*全局扩展脚本*。
+1. 将 `global-extend-config.yaml` 复制到*全局扩展配置*。
+2. 将 `global-extend-script.js` 复制到*全局扩展脚本*。
+3. 右键需要使用这些策略的订阅，将 `profile-extend-config.yaml` 复制到该订阅的*扩展配置*，填写其外部订阅来源；不需要外部节点时保持 `proxy-providers: {}`。
+4. 将 `profile-extend-script.js` 复制到该订阅的*扩展脚本*，按需调整主代理组、节点黑白名单和地区组。其他需要相同策略的订阅也分别配置。
 
-> **provider 和 脚本均可自定义，修改后需要保证拓展脚本引用的 provider 名称与拓展配置一致。**
+执行顺序为：全局扩展配置 → 全局扩展脚本 → 订阅扩展配置 → 订阅扩展脚本。节点来源由当前订阅的配置提供，再由其脚本接入主代理组及 US、JP；各订阅的来源和筛选参数分别维护。
 
-常用配置集中在脚本开头：
+不同外部来源使用不同的 provider 名称和缓存 `path`，避免跨订阅共用缓存。
+
+全局脚本只覆写公共 DNS 字段；订阅脚本保留之后写入的 DNS 设置。公共规则集来源集中在全局 YAML，规则优先级统一由订阅脚本维护。provider 名称需与脚本中的规则集名称一致。
+
+#### 拓展脚本补充说明
+
+常用配置集中在订阅脚本开头，全局 DNS 则修改全局脚本的 `dnsOverrides`：
 
 - `profilePolicyMap`：profile 名称与代理组名称的对应关系。
 - `proxyPolicyCandidates`：profile 未命中时的代理组候选名称。
@@ -109,10 +120,8 @@ Mihomo 使用首条命中的规则，修改这些列表时需保留所需的优�
 扩展脚本测试使用 Node.js 内置的测试运行器，不需要安装第三方依赖：
 
 ```bash
-node --test clash-verge/extend-script.test.js
+node --test clash-verge/test/*.test.js
 ```
-
-测试覆盖地区识别与稳定排序、未配置地区节点和代理组引用的保留、黑白名单筛选与优先级、AI/TikTok 组的选项与 PayPal 分流，以及脚本重复运行后的幂等性。
 
 ## 规则参考来源
 
