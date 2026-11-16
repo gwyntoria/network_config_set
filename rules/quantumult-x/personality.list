@@ -1,6 +1,6 @@
 # NAME: Personality
 # SOURCE: https://github.com/gwyntoria/network_config_set/blob/main/rules/quantumult-x/personality.list
-# UPDATED: 2026-11-11
+# UPDATED: 2026-11-16
 
 # direct
 HOST-SUFFIX,caixin.com,direct
@@ -14,6 +14,8 @@ HOST-SUFFIX,ghelper.me,proxy
 HOST-SUFFIX,ghv.app,proxy
 
 # jable
+HOST-SUFFIX,jable.tv,proxy
+HOST-SUFFIX,cdnlab.live,proxy
 HOST-SUFFIX,mushroomtrack.com,proxy
 
 # JYP Bubble (Dear U)
