@@ -32,6 +32,7 @@
 | [global-extend-script.js](clash-verge/global-extend-script.js) | 全局 DNS、fake-ip 和 DNS 例外 |
 | [profile-extend-config.yaml](clash-verge/profile-extend-config.yaml) | 当前 profile 的外部节点 `proxy-providers` 模板 |
 | [profile-extend-script.js](clash-verge/profile-extend-script.js) | 当前 profile 的节点整理、策略组和规则合并 |
+| [profile-prepend-rules.yaml](clash-verge/profile-prepend-rules.yaml) | 当前 profile 的自定义 rule |
 
 ### 测试文件
 
@@ -72,22 +73,23 @@ https://raw.githubusercontent.com/gwyntoria/network_config_set/main/rules/quantu
 
 **这些列表已包含策略。** 但使用时依然可以指定 `force-policy` 。
 
-### Clash Verge Rev 扩展脚本
+### Clash Verge Rev 扩展
 
-1. 将 `global-extend-config.yaml` 复制到*全局扩展配置*。
-2. 将 `global-extend-script.js` 复制到*全局扩展脚本*。
-3. 右键需要使用这些策略的订阅，将 `profile-extend-config.yaml` 复制到该订阅的*扩展配置*，填写其外部订阅来源；不需要外部节点时保持 `proxy-providers: {}`。
-4. 将 `profile-extend-script.js` 复制到该订阅的*扩展脚本*，按需调整主代理组、节点黑白名单和地区组。其他需要相同策略的订阅也分别配置。
+1. 将 [`global-extend-config.yaml`](clash-verge/global-extend-config.yaml) 复制到 *全局扩展配置（config）*。
+2. 将 [`global-extend-script.js`](clash-verge/global-extend-script.js) 复制到 *全局扩展脚本（script）*。
+3. 如果需要在一个订阅（profile）中使用另一个订阅的节点，右键需要使用外部订阅节点的订阅，将 [`profile-extend-config.yaml`](clash-verge/profile-extend-config.yaml) 复制到该订阅的*扩展配置*，填写其外部订阅来源；不需要外部节点时，不需要配置。
+4. 将 [`profile-extend-script.js`](clash-verge/profile-extend-script.js) 复制到该订阅的*扩展脚本*，按需调整主代理组、节点黑白名单和地区组。其他需要相同策略的订阅也分别配置。
 
-执行顺序为：全局扩展配置 → 全局扩展脚本 → 订阅扩展配置 → 订阅扩展脚本。节点来源由当前订阅的配置提供，再由其脚本接入主代理组及 US、JP；各订阅的来源和筛选参数分别维护。
+#### 拓展配置及脚本补充说明
 
-不同外部来源使用不同的 provider 名称和缓存 `path`，避免跨订阅共用缓存。
+clash verge rev 的执行顺序为：全局扩展配置 → 全局扩展脚本 → 订阅扩展配置 → 订阅扩展脚本。
 
-全局脚本只覆写公共 DNS 字段；订阅脚本保留之后写入的 DNS 设置。公共规则集来源集中在全局 YAML，规则优先级统一由订阅脚本维护。provider 名称需与脚本中的规则集名称一致。
+因此：
 
-#### 拓展脚本补充说明
+- 全局拓展配置只包含公共规则集，全局拓展脚本只覆写公共 DNS 字段。
+- 订阅拓展配置才提供 `proxy-provider`，订阅拓展脚本才维护节点的筛选和顺序、规则集的新增。
 
-常用配置集中在订阅脚本开头，全局 DNS 则修改全局脚本的 `dnsOverrides`：
+可自定义的配置，集中在订阅拓展脚本的开头，全局 DNS 则修改全局脚本的 `dnsOverrides`：
 
 - `profilePolicyMap`：profile 名称与代理组名称的对应关系。
 - `proxyPolicyCandidates`：profile 未命中时的代理组候选名称。
@@ -104,6 +106,8 @@ https://raw.githubusercontent.com/gwyntoria/network_config_set/main/rules/quantu
 广告拦截规则
 AI 规则
 TikTok 规则
+...
+...
 代理 provider 规则
 订阅原有规则
 ```
