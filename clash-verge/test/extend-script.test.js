@@ -4,8 +4,8 @@ const path = require("node:path");
 const test = require("node:test");
 const vm = require("node:vm");
 
-function loadScript() {
-  const scriptPath = path.join(__dirname, "..", "extend-script.js");
+function loadScript(fileName = "profile-extend-script.js") {
+  const scriptPath = path.join(__dirname, "..", fileName);
   const source = fs.readFileSync(scriptPath, "utf8");
   const context = vm.createContext({
     console: { warn() {} },
@@ -390,7 +390,7 @@ test("is idempotent for managed groups and rules", () => {
 });
 
 test("overrides managed DNS settings and preserves other fields", () => {
-  const main = loadMain();
+  const main = loadScript("global-extend-script.js").__main;
   const config = makeConfig(["JP-01"]);
   config.dns = {
     enable: false,
@@ -436,6 +436,96 @@ test("overrides managed DNS settings and preserves other fields", () => {
   delete config.dns;
   main(config, "UNKNOWN");
   assert.deepEqual(JSON.parse(JSON.stringify(config.dns)), expectedDns);
+});
+
+test("global script leaves profile nodes, providers, groups and rules unchanged", () => {
+  const config = makeConfig(["JP-local", "US-local", "DE-local"]);
+  addProviders(config);
+  const original = JSON.parse(JSON.stringify(config));
+
+  assert.equal(loadScript("global-extend-script.js").__main(config, "CLOUD"), config);
+
+  const { dns, ...rest } = config;
+  assert.deepEqual(rest, original);
+  assert.equal(dns["enhanced-mode"], "fake-ip");
+});
+
+test("profile script preserves DNS including profile-specific overrides", () => {
+  const config = makeConfig(["JP-local"]);
+  const globalMain = loadScript("global-extend-script.js").__main;
+  const profileMain = loadMain();
+  globalMain(config, "CLOUD");
+  config.dns.nameserver = ["https://dns.example.invalid/dns-query"];
+  const dns = JSON.parse(JSON.stringify(config.dns));
+
+  assert.equal(profileMain(config, "CLOUD"), config);
+  assert.deepEqual(JSON.parse(JSON.stringify(config.dns)), dns);
+
+  delete config.dns;
+  profileMain(config, "CLOUD");
+  assert.equal(config.dns, undefined);
+});
+
+test("accepts providers merged after the global script and keeps the complete rule order", () => {
+  const config = makeConfig(["JP-local", "US-local"]);
+  const globalMain = loadScript("global-extend-script.js").__main;
+  const profileMain = loadMain();
+  globalMain(config, "UNKNOWN");
+  // 模拟订阅扩展配置：来源在全局脚本执行之后才进入当前配置。
+  addProviders(config);
+  profileMain(config, "UNKNOWN");
+  assert.deepEqual(Array.from(getGroup(config, "Proxy").use), ["sanmao", "second"]);
+  assert.deepEqual(Array.from(config.rules), [
+    "RULE-SET,GameDirect,DIRECT",
+    "RULE-SET,AD,REJECT",
+    "RULE-SET,OpenAI,AI",
+    "RULE-SET,Gemini,AI",
+    "RULE-SET,Anthropic,AI",
+    "RULE-SET,TikTok,TikTok",
+    "RULE-SET,GameProxy,Proxy",
+    "RULE-SET,PayPal,Proxy",
+    "MATCH,DIRECT",
+  ]);
+
+  const once = JSON.stringify(config);
+  profileMain(globalMain(config, "UNKNOWN"), "UNKNOWN");
+  assert.equal(JSON.stringify(config), once);
+});
+
+test("keeps provider sources, whitelist and main policy independent between profiles", () => {
+  const globalMain = loadScript("global-extend-script.js").__main;
+  const firstContext = loadScript();
+  const secondContext = loadScript();
+  vm.runInContext('profilePolicyMap.CUSTOM = "Other";', firstContext);
+  vm.runInContext('includedProxyNameRules.splice(0, includedProxyNameRules.length, { codes: ["JP"] });', firstContext);
+
+  const first = makeConfig(["JP-local", "US-local"]);
+  const second = makeConfig(["JP-local", "US-local"]);
+  for (const config of [first, second]) {
+    config["proxy-groups"].push({ name: "Other", type: "select", proxies: ["JP-local", "US-local"] });
+    globalMain(config, "CUSTOM");
+    addProviders(config);
+  }
+  delete first["proxy-providers"].second;
+  delete second["proxy-providers"].sanmao;
+  firstContext.__main(first, "CUSTOM");
+  secondContext.__main(second, "CUSTOM");
+
+  assert.deepEqual(Array.from(getGroup(first, "Other").use), ["sanmao"]);
+  assert.deepEqual(Array.from(getGroup(second, "Proxy").use), ["second"]);
+  assert.deepEqual(Array.from(getGroup(first, "Proxy").proxies), ["JP-local", "DIRECT"]);
+  assert.deepEqual(Array.from(getGroup(second, "Proxy").proxies), ["JP-local", "US-local", "DIRECT"]);
+  for (const name of ["US", "JP"]) {
+    assert.deepEqual(Array.from(getGroup(first, name).use), ["sanmao"]);
+    assert.deepEqual(Array.from(getGroup(second, name).use), ["second"]);
+  }
+  assert.deepEqual(Array.from(getGroup(first, "AI").proxies), ["Other", "US", "JP"]);
+  assert.deepEqual(Array.from(getGroup(second, "AI").proxies), ["Proxy", "US", "JP"]);
+
+  const withoutProviders = makeConfig(["JP-local"]);
+  firstContext.__main(globalMain(withoutProviders, "CUSTOM"), "CUSTOM");
+  assert.equal(withoutProviders["proxy-providers"], undefined);
+  assert.equal(getGroup(withoutProviders, "Proxy").use, undefined);
 });
 
 function addProviders(config) {

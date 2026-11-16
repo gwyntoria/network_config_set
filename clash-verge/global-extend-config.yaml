@@ -1,27 +1,5 @@
-# Clash Verge Rev 全局扩展配置，配合 extend-script.js 使用。
-# 
-# rule-providers 用于导入外部规则集。
-# proxy-providers 用于导入外部节点集。
-
-# 外部订阅只使用其节点，不合并其规则或策略组。
-# 默认不导入外部节点。启用下面的示例时，删除 proxy-providers: {}，并取消示例的注释。
-
-proxy-providers: {}
-
-# proxy-providers:
-#   sample:
-#     type: http
-#     url: "订阅链接"
-#     path: ./proxy_providers/sample.yaml
-#     interval: 86400
-#     proxy: DIRECT
-#     override:
-#       additional-prefix: "[sample] " # 可修改的来源前缀，不参与地区识别和黑白名单匹配。
-#     health-check:
-#       enable: true
-#       url: https://www.gstatic.com/generate_204
-#       interval: 3600
-#       lazy: false
+# Clash Verge Rev 全局扩展配置：所有 profile 共用的规则集来源。
+# 外部节点来源在各 profile 的 profile-extend-config.yaml 中配置。
 
 rule-providers:
   AD:

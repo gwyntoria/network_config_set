@@ -1,0 +1,24 @@
+# Clash Verge Rev 订阅扩展配置，配合 profile-extend-script.js 使用。
+# 每个 profile 单独保存自己的外部节点来源，不要放入全局扩展配置。
+# 不同外部来源使用不同的 provider 名称和缓存 path，避免跨 profile 共用缓存。
+
+# 外部订阅只使用其节点，不合并其规则或策略组。
+# 默认不导入外部节点。启用下面的示例时，删除 proxy-providers: {}，并取消示例的注释。
+
+proxy-providers: {}
+
+# proxy-providers:
+#   sample:
+#     type: http
+#     url: "订阅链接"
+#     path: ./proxy_providers/sample.yaml
+#     interval: 86400
+#     proxy: DIRECT
+#     override:
+#       additional-prefix: "[sample] " # 可修改的来源前缀，不参与地区识别和黑白名单匹配。
+#     health-check:
+#       enable: true
+#       url: https://www.gstatic.com/generate_204
+#       interval: 3600
+#       lazy: false
+

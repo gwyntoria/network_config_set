@@ -32,9 +32,17 @@ test("Mihomo expands subscriptions, preserves cache on failure and rejects empty
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   t.after(() => new Promise((resolve) => server.close(resolve)));
   const origin = `http://127.0.0.1:${server.address().port}`;
-  const source = await fs.readFile(path.join(__dirname, "..", "extend-script.js"), "utf8");
-  const context = vm.createContext({ console });
-  vm.runInContext(`${source}\nglobalThis.__main = main;`, context);
+  const mains = [];
+  for (const fileName of ["global-extend-script.js", "profile-extend-script.js"]) {
+    const source = await fs.readFile(path.join(__dirname, "..", fileName), "utf8");
+    const context = vm.createContext({ console });
+    vm.runInContext(`${source}\nglobalThis.__main = main;`, context);
+    mains.push(context.__main);
+  }
+  function main(config, profileName) {
+    for (const transform of mains) config = transform(config, profileName);
+    return config;
+  }
 
   // 先占用一个随机端口，写配置后交给内核的控制 API 使用。
   const reservation = http.createServer();
@@ -58,7 +66,7 @@ test("Mihomo expands subscriptions, preserves cache on failure and rejects empty
     ),
     rules: ["MATCH,Proxy"],
   };
-  context.__main(config, "nozomi");
+  main(config, "nozomi");
   // 测试进程不接管宿主机 DNS 端口。
   config.dns = { enable: false };
   const configPath = path.join(directory, "config.json");
@@ -126,7 +134,7 @@ test("Mihomo expands subscriptions, preserves cache on failure and rejects empty
   empty["proxy-providers"] = {
     hk: { type: "inline", payload: [{ name: "香港-01", type: "socks5", server: "127.0.0.1", port: 1 }], override: { "additional-prefix": "[香港源] " } },
   };
-  context.__main(empty, "nozomi");
+  main(empty, "nozomi");
   empty.dns = { enable: false };
   await fs.writeFile(configPath, JSON.stringify(empty));
   await start();
