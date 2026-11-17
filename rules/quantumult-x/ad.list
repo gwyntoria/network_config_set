@@ -1,7 +1,7 @@
 # NAME: AD
 # SOURCE: https://github.com/gwyntoria/network_config_set/blob/main/rules/quantumult-x/ad.list
 # REFERENCE: https://raw.githubusercontent.com/earoftoast/clash-rules/main/AD.yaml
-# UPDATED: 2026-09-16
+# UPDATED: 2026-11-16
 
 # 广告联盟-国内
 HOST-SUFFIX,09mk.cn,reject
@@ -577,3 +577,6 @@ HOST-SUFFIX,114so.cn,reject
 HOST-SUFFIX,go.10086.cn,reject
 HOST-SUFFIX,hivedata.cc,reject
 HOST-SUFFIX,navi.gd.chinamobile.com,reject
+
+# spotify ad
+HOST-SUFFIX,adeventtracker.spotify.com,reject

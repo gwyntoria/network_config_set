@@ -1,30 +1,34 @@
 /**
- * Clash Verge Rev 全局扩展脚本。
+ * Clash Verge Rev 订阅扩展脚本，每个 profile 单独配置。
  *
  * 通常只需修改下列常量，不要改动后面的处理函数：
+ *
+ * 外部订阅在 profile-extend-config.yaml 的 proxy-providers 中配置，链接和来源前缀只维护在 YAML。
+ * 将该 YAML 用作当前 profile 的订阅扩展配置，并配合本脚本使用；空 proxy-providers 不启用外部导入。
+ * 所有 provider 会接入当前主代理组和 US、JP；不导入外部规则或策略组。
+ * 默认直连下载、每天更新、每小时测速。更新失败时由内核保留已有缓存。
+ * 外部节点沿用下列黑白名单和地区识别，但保留 provider 返回顺序。
  *
  * - profilePolicyMap：profile 名称到代理组名称的精确映射。
  * - proxyPolicyCandidates：映射未命中时使用的代理组候选名称，越靠前越优先。
  * - proxyRegions：订阅节点的地区排序定义，越靠前排序优先级越高；未匹配的节点按原顺序排在后面，不按地区筛选。keywords 使用不区分大小写的子串匹配，codes 只匹配两侧不紧邻英文字母的地区代码。
  * - excludedProxyNameRules：订阅节点黑名单，匹配方式同上；命中后一定移除。空数组表示不排除任何节点。
  * - includedProxyNameRules：订阅节点白名单，匹配方式同上；非空时只保留命中的订阅节点，空数组表示不限制。当前保留香港、美国、日本、韩国和英国节点，黑名单优先于白名单。
- * - regionProxyGroups：美国、日本节点专用代理组，只包含对应地区的订阅节点，每小时测速并自动选择低延迟节点。
+ * - regionProxyGroups：美国、日本节点专用代理组，只包含对应地区的订阅节点，手动选择节点。
  * - aiProxyGroup：AI 专用代理组，在当前 profile 的普通代理组和 US、JP 之间手动选择。
  * - aiRuleProviderNames：强制使用 AI 代理组的 rule-provider 名称，必须与合并配置中的名称完全一致。
  * - tiktokProxyGroup：TikTok 专用代理组，选项与 AI 代理组相同。
  * - tiktokRuleProviderNames：强制使用 TikTok 代理组的 rule-provider 名称。
+ * - youtubeProxyGroup：YouTube 专用代理组，选项为当前主代理组及可用的 US、JP。
+ * - youtubeRuleProviderNames：强制使用 YouTube 代理组的 rule-provider 名称。
  * - rejectRuleProviderNames：使用 REJECT 策略的 rule-provider 名称。
  * - directRuleProviderNames：使用 DIRECT 策略的 rule-provider 名称。
  * - proxyRuleProviderNames：使用当前 profile 代理策略的 rule-provider 名称。
- * - directRules：强制直连的完整 Mihomo 规则，每条规则必须包含末尾的 DIRECT。
- * - proxyRulePrefixes：强制代理的 Mihomo 规则前缀，不要填写末尾策略组，脚本会根据 profile 自动补上解析出的代理组名称。
- * - dnsOverrides：强制写入的 Mihomo DNS 配置，修正订阅自带的境外 DoH fallback
- *   导致境外域名解析停滞、以及缺少 proxy-server-nameserver 导致节点域名解析失败的问题。
  *
- * 规则顺序为 directRules、directRuleProviderNames、rejectRuleProviderNames、
- * aiRuleProviderNames、tiktokRuleProviderNames、proxyRuleProviderNames、
- * proxyRulePrefixes、订阅原规则，
- * Mihomo 按首条匹配规则执行。节点筛选和排序只处理 config.proxies 中的真实订阅节点，
+ * 规则顺序为 directRuleProviderNames、rejectRuleProviderNames、
+ * aiRuleProviderNames、tiktokRuleProviderNames、youtubeRuleProviderNames、proxyRuleProviderNames、订阅原规则，
+ * Mihomo 按首条匹配规则执行。脚本只筛选和排序代理组中的真实订阅节点引用，不删除 config.proxies 中的节点定义，
+ * 外部节点由内核按脚本生成的 filter 筛选，来源前缀不参与节点名称匹配。
  * DIRECT、REJECT 以及其他代理组引用会保留在原位置。上述列表中的 name 仅用于标注，
  * 不参与匹配。
  */
@@ -88,18 +92,6 @@ const excludedProxyNameRules = [
     name: "IPv6",
     keywords: ["ipv6"],
   },
-  // {
-  //   name: "移动",
-  //   keywords: ["移动"],
-  // },
-  // {
-  //   name: "电信",
-  //   keywords: ["电信"],
-  // },
-  // {
-  //   name: "联通",
-  //   keywords: ["联通"],
-  // },
 ];
 
 // 从 proxy groups 里只保留白名单命中的订阅节点（不删除 config.proxies）。
@@ -125,19 +117,24 @@ const includedProxyNameRules = [
     keywords: ["美国", "美國", "United States", "America", "🇺🇸"],
     codes: ["US", "USA"],
   },
-  // {
-  //   name: "台湾",
-  //   keywords: ["台湾", "台灣", "Taiwan", "Taipei", "🇹🇼"],
-  //   codes: ["TW"],
-  // },
   {
     name: "英国",
     keywords: ["英国", "英國", "United Kingdom", "Britain", "London", "🇬🇧"],
     codes: ["UK"],
   },
+  {
+    name: "新加坡",
+    keywords: ["新加坡", "Singapore", "狮城", "🇸🇬"],
+    codes: ["SG"],
+  },
+  // {
+  //   name: "台湾",
+  //   keywords: ["台湾", "台灣", "Taiwan", "Taipei", "🇹🇼"],
+  //   codes: ["TW"],
+  // },
 ];
 
-// 地区自动选择组：regionId 对应 proxyRegions 中的 id，只包含该地区的真实订阅节点。
+// 地区手动选择组：regionId 对应 proxyRegions 中的 id，只包含该地区的真实订阅节点。
 const regionProxyGroups = [
   { name: "US", regionId: "US" },
   { name: "JP", regionId: "JP" },
@@ -153,42 +150,9 @@ const tiktokProxyGroup = {
   type: "select",
 };
 
-// 强制写入 Mihomo 的 DNS 配置，整体替换订阅自带或 GUI「DNS 覆写」中的对应字段。
-// 目的：
-// 1. 统一使用国内 DoH：订阅自带的 fallback（1.1.1.1 / 8.8.8.8 / dns.google）在国内
-//    直连不可达，会让每个境外域名解析等待约 5 秒，网页明显变慢；
-// 2. 显式配置 proxy-server-nameserver：保证节点服务器域名走干净通道解析，
-//    避免节点拨号超时（美国等节点失效的根因）；
-// 3. 固定 fake-ip 模式：代理流量按域名分流，不依赖本地解析结果。
-// 注意：使用脚本后建议关闭 GUI 的「DNS 覆写」；若保留，请保持两边配置一致。
-const dnsOverrides = {
-  "enable": true,
-  "enhanced-mode": "fake-ip",
-  "fake-ip-range": "198.18.0.1/16",
-  "listen": ":53",
-  "fake-ip-filter": [
-    "*.lan",
-    "*.local",
-    "*.arpa",
-    "time.*.com",
-    "ntp.*.com",
-    "+.market.xiaomi.com",
-    "localhost.ptlogin2.qq.com",
-    "*.msftncsi.com",
-    "www.msftconnecttest.com",
-  ],
-  "nameserver": [
-    "https://doh.pub/dns-query",
-    "https://dns.alidns.com/dns-query",
-  ],
-  "proxy-server-nameserver": [
-    "https://doh.pub/dns-query",
-    "https://dns.alidns.com/dns-query",
-  ],
-  "fallback": [
-    "https://doh.pub/dns-query",
-    "https://dns.alidns.com/dns-query",
-  ],
+const youtubeProxyGroup = {
+  name: "YouTube",
+  type: "select",
 };
 
 const rejectRuleProviderNames = ["AD"];
@@ -196,56 +160,7 @@ const directRuleProviderNames = ["GameDirect"];
 const proxyRuleProviderNames = ["GameProxy", "PayPal"];
 const aiRuleProviderNames = ["OpenAI", "Gemini", "Anthropic"];
 const tiktokRuleProviderNames = ["TikTok"];
-
-// 需要强制直连的规则放在这里，避免国内服务、办公软件和支付场景误走代理。
-const directRules = [
-  // --- 微信 / WeChat: Windows ---
-  `PROCESS-NAME,Weixin.exe,DIRECT`,
-  `PROCESS-NAME,WeChat.exe,DIRECT`,
-  `PROCESS-NAME,WeChatAppEx.exe,DIRECT`,
-
-  // --- 微信 / WeChat: macOS ---
-  `PROCESS-NAME,Weixin,DIRECT`,
-  `PROCESS-NAME,WeChat,DIRECT`,
-
-  // --- 钉钉 / DingTalk: Windows ---
-  `PROCESS-NAME,DingTalk.exe,DIRECT`,
-
-  // --- 钉钉 / DingTalk: macOS ---
-  `PROCESS-NAME,DingTalk,DIRECT`,
-
-  // --- 微信域名 ---
-  `DOMAIN-SUFFIX,wechat.com,DIRECT`,
-  `DOMAIN-SUFFIX,weixin.qq.com,DIRECT`,
-  `DOMAIN-SUFFIX,weixin.com,DIRECT`,
-  `DOMAIN-SUFFIX,servicewechat.com,DIRECT`,
-  `DOMAIN-SUFFIX,wx.qq.com,DIRECT`,
-  `DOMAIN-SUFFIX,gtimg.com,DIRECT`,
-  `DOMAIN-SUFFIX,qpic.cn,DIRECT`,
-  `DOMAIN-SUFFIX,qlogo.cn,DIRECT`,
-  `DOMAIN-SUFFIX,tenpay.com,DIRECT`,
-  `DOMAIN-SUFFIX,wechatpay.com,DIRECT`,
-
-  // --- 钉钉域名 ---
-  `DOMAIN-SUFFIX,dingtalk.com,DIRECT`,
-  `DOMAIN-SUFFIX,dingtalkapps.com,DIRECT`,
-  `DOMAIN-SUFFIX,alicdn.com,DIRECT`,
-  `DOMAIN-SUFFIX,aliyuncs.com,DIRECT`,
-  `DOMAIN-SUFFIX,mxhichina.com,DIRECT`,
-  `DOMAIN-SUFFIX,mmstat.com,DIRECT`,
-];
-
-// 需要强制走代理的规则放在这里，策略组统一使用当前 profile 解析出的 proxyPolicy。
-const proxyRulePrefixes = [
-  // --- 其他代理规则 ---
-  // 示例："DOMAIN-SUFFIX,example.com"
-];
-
-function buildProxyRules(proxyPolicy) {
-  if (!proxyPolicy) return [];
-
-  return proxyRulePrefixes.map((rule) => `${rule},${proxyPolicy}`);
-}
+const youtubeRuleProviderNames = ["YouTube"];
 
 function buildProxyGroupRuleProviderRules(config, providerNames, groupName) {
   if (!getProxyGroupNames(config).includes(groupName)) return [];
@@ -268,6 +183,14 @@ function buildTikTokProxyRules(config) {
     config,
     tiktokRuleProviderNames,
     tiktokProxyGroup.name,
+  );
+}
+
+function buildYouTubeProxyRules(config) {
+  return buildProxyGroupRuleProviderRules(
+    config,
+    youtubeRuleProviderNames,
+    youtubeProxyGroup.name,
   );
 }
 
@@ -357,16 +280,13 @@ function mergeProxyRules(config, profileName) {
     );
   }
 
-  const proxyRules = buildProxyRules(proxyPolicy);
-
   config.rules = uniqueRules(
-    directRules
-      .concat(buildDirectRuleProviderRules())
+    buildDirectRuleProviderRules()
       .concat(buildRejectRules())
       .concat(buildAiProxyRules(config))
       .concat(buildTikTokProxyRules(config))
+      .concat(buildYouTubeProxyRules(config))
       .concat(buildProxyRuleProviderRules(proxyPolicy))
-      .concat(proxyRules)
       .concat(oldRules),
   );
 }
@@ -447,10 +367,125 @@ function shouldKeepProxyName(proxyName) {
   );
 }
 
-function ensureRegionProxyGroups(config) {
-  if (!Array.isArray(config.proxies)) return;
+/** 配置原生订阅下载和测速；保留 YAML 中的下载出口、更新周期和来源前缀。 */
+function prepareProxyProviders(config) {
+  const providers = config["proxy-providers"] || {};
+  const names = Object.keys(providers).filter((name) => {
+    return providers[name] && typeof providers[name] === "object";
+  });
 
-  const keptProxyNames = config.proxies
+  for (const name of names) {
+    const provider = providers[name];
+    if (provider.interval === undefined) provider.interval = 86400;
+    if (provider.proxy === undefined) provider.proxy = "DIRECT";
+    provider.override = {
+      "additional-prefix": `[${name}] `,
+      ...provider.override,
+    };
+    // use 引入的节点不由代理组的 url 字段测速，必须启用 provider 自身的检测。
+    provider["health-check"] = {
+      ...provider["health-check"],
+      enable: true,
+      url: "https://www.gstatic.com/generate_204",
+      interval: 3600,
+      lazy: false,
+    };
+  }
+
+  return names;
+}
+
+function escapeRegex(value) {
+  // Mihomo 用反引号分隔多个筛选式，字面量反引号必须写为十六进制转义。
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/`/g, "\\x60");
+}
+
+/** 从名称当前位置开始匹配规则，保留 codes 两侧不紧邻英文字母的约束。 */
+function buildProxyNameRulePattern(rules) {
+  const patterns = [];
+  for (const rule of rules) {
+    for (const keyword of rule.keywords || []) {
+      patterns.push(`[\\s\\S]*${escapeRegex(keyword)}`);
+    }
+    for (const code of rule.codes || []) {
+      patterns.push(`(?:[\\s\\S]*[^a-z])?${escapeRegex(code)}(?![a-z])`);
+    }
+  }
+  return patterns.length > 0 ? `(?:${patterns.join("|")})` : "(?!)";
+}
+
+/**
+ * 生成 Mihomo regexp2 筛选式，在来源前缀之后匹配原始节点名。
+ * 断言同时约束黑白名单和地区；较早地区优先，与 getProxyRegion 一致。
+ * filter 仅作用于 use 引入的节点，显式 proxies 中的组引用不受影响。
+ */
+function buildProviderFilter(config, providerNames, regionId) {
+  const prefixes = Array.from(
+    new Set(
+      providerNames.map((name) => {
+        return escapeRegex(
+          config["proxy-providers"][name].override["additional-prefix"],
+        );
+      }),
+    ),
+  ).sort((left, right) => right.length - left.length);
+  // 前缀重叠时只消费最长前缀，禁止断言失败后回退并把来源文字当成节点名。
+  const prefixPattern = prefixes
+    .map((prefix, index) => {
+      const longer = prefixes.slice(0, index);
+      return longer.length > 0 ? `(?!${longer.join("|")})${prefix}` : prefix;
+    })
+    .join("|");
+  let pattern = `(?i)^(?:${prefixPattern})`;
+  if (includedProxyNameRules.length > 0) {
+    pattern += `(?=${buildProxyNameRulePattern(includedProxyNameRules)})`;
+  }
+  if (excludedProxyNameRules.length > 0) {
+    pattern += `(?!${buildProxyNameRulePattern(excludedProxyNameRules)})`;
+  }
+  if (regionId) {
+    const regionIndex = proxyRegions.findIndex(
+      (region) => region.id === regionId,
+    );
+    pattern += `(?=${buildProxyNameRulePattern([proxyRegions[regionIndex]])})`;
+    if (regionIndex > 0) {
+      pattern += `(?!${buildProxyNameRulePattern(proxyRegions.slice(0, regionIndex))})`;
+    }
+  }
+  return `${pattern}[\\s\\S]*$`;
+}
+
+/** 接入当前主代理组，追加 use 时去重，保留原有显式节点和策略组引用。 */
+function attachProxyProviders(config, profileName, providerNames) {
+  if (providerNames.length === 0) return;
+  const policy = resolveProxyPolicy(config, profileName);
+  const group = getProxyGroups(config).find(
+    (group) => group && group.name === policy,
+  );
+  if (!group) {
+    console.warn(
+      "[clash-verge] No main proxy group found. External providers were not attached to a main group.",
+    );
+    return;
+  }
+  // filter 也会筛选 include-all-proxies 引入的节点，先展开为显式节点以保留主订阅。
+  if (group["include-all"] || group["include-all-proxies"]) {
+    group.proxies = Array.from(
+      new Set([...(group.proxies || []), ...getProxyNameSet(config)]),
+    );
+  }
+  group.use = Array.from(new Set([...(group.use || []), ...providerNames]));
+  group.filter = buildProviderFilter(config, providerNames);
+  // include-all-providers 会使 use 失效，禁用它以遵循明确列出的来源。
+  delete group["include-all-providers"];
+  delete group["include-all"];
+  delete group["include-all-proxies"];
+}
+
+function ensureRegionProxyGroups(config, providerNames) {
+  if (!Array.isArray(config.proxies) && providerNames.length === 0) return;
+
+  const keptProxyNames = (config.proxies || [])
     .map(getProxyName)
     .filter(Boolean)
     .filter((proxyName) => shouldKeepProxyName(proxyName));
@@ -465,7 +500,7 @@ function ensureRegionProxyGroups(config) {
       return region && region.id === regionGroup.regionId;
     });
 
-    if (regionProxyNames.length === 0) {
+    if (regionProxyNames.length === 0 && providerNames.length === 0) {
       removedGroupNames.add(regionGroup.name);
       console.warn(
         `[clash-verge] No ${regionGroup.name} proxy nodes found. ${regionGroup.name} group was skipped.`,
@@ -480,20 +515,31 @@ function ensureRegionProxyGroups(config) {
     const nextGroup = {
       ...oldGroup,
       name: regionGroup.name,
-      // type: "select", // 原手动选择方式，保留以便恢复。
-      type: "url-test",
-      url: "https://www.gstatic.com/generate_204",
-      interval: 3600,
-      lazy: false, // 未使用该组时也按间隔测速。
-      tolerance: 0,
+      type: "select",
       proxies: regionProxyNames,
     };
 
-    // 原手动选择组不需要延迟检测字段，恢复 select 时同时恢复以下逻辑。
-    // delete nextGroup.url;
-    // delete nextGroup.interval;
-    // delete nextGroup.lazy;
-    // delete nextGroup.tolerance;
+    if (providerNames.length > 0) {
+      nextGroup.use = providerNames.slice();
+      nextGroup.filter = buildProviderFilter(
+        config,
+        providerNames,
+        regionGroup.regionId,
+      );
+      nextGroup["empty-fallback"] = "REJECT";
+      // 地区组只允许显式地区节点和通过地区筛选的 provider 节点。
+      delete nextGroup["include-all"];
+      delete nextGroup["include-all-providers"];
+      delete nextGroup["include-all-proxies"];
+      delete nextGroup["exclude-filter"];
+      delete nextGroup["exclude-type"];
+    }
+
+    // 手动选择组不需要延迟检测字段，清理原地区组可能残留的配置。
+    delete nextGroup.url;
+    delete nextGroup.interval;
+    delete nextGroup.lazy;
+    delete nextGroup.tolerance;
 
     if (oldGroup) {
       groups[groups.indexOf(oldGroup)] = nextGroup;
@@ -644,23 +690,22 @@ function filterAndSortProxyGroupProxies(config) {
   }
 }
 
-function applyDnsOverrides(config) {
-  const currentDns =
-    config.dns && typeof config.dns === "object" ? config.dns : {};
-
-  // 数组字段整体替换，确保订阅自带的境外 DoH 不会残留。
-  config.dns = { ...currentDns, ...dnsOverrides };
-}
-
 function main(config, profileName) {
-  applyDnsOverrides(config);
   removeProxyGroup(config, "OpenAI");
-  ensureRegionProxyGroups(config);
+  const providerNames = prepareProxyProviders(config);
+  attachProxyProviders(config, profileName, providerNames);
+  ensureRegionProxyGroups(config, providerNames);
   ensureSelectProxyGroup(
     config,
     profileName,
     tiktokProxyGroup,
     "[clash-verge] No proxy groups found for TikTok. TikTok rules were skipped.",
+  );
+  ensureSelectProxyGroup(
+    config,
+    profileName,
+    youtubeProxyGroup,
+    "[clash-verge] No proxy groups found for YouTube. YouTube rules were skipped.",
   );
   ensureSelectProxyGroup(
     config,

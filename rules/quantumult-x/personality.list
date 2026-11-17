@@ -1,13 +1,34 @@
 # NAME: Personality
 # SOURCE: https://github.com/gwyntoria/network_config_set/blob/main/rules/quantumult-x/personality.list
-# UPDATED: 2026-10-27
+# UPDATED: 2026-11-16
 
 # direct
 HOST-SUFFIX,caixin.com,direct
 HOST-SUFFIX,dedao.com,direct
 HOST-SUFFIX,linuxdo.org,direct
+HOST-SUFFIX,immersivetranslate.com,direct
 
-# proxy
+# ghelper
+HOST-SUFFIX,sv.plebai.net,DIRECT
+HOST-SUFFIX,plebvps.com,DIRECT
+HOST-SUFFIX,gotochinatown.net,DIRECT
+HOST-SUFFIX,oshuawei.com,DIRECT
+HOST-SUFFIX,hyhuawei.com,DIRECT
+HOST-SUFFIX,cdnhuawei.com,DIRECT
+HOST-SUFFIX,cmhuawei.com,DIRECT
+HOST-SUFFIX,viphuawei.com,DIRECT
+HOST-SUFFIX,iphuawei.com,DIRECT
+HOST-SUFFIX,cdnkuaishou.com,DIRECT
+
+# airport
+HOST-SUFFIX,just.adomainforsub.org,proxy
+HOST-SUFFIX,ghelper.net,proxy
+HOST-SUFFIX,ghelper.me,proxy
+HOST-SUFFIX,ghv.app,proxy
+
+# jable
+HOST-SUFFIX,jable.tv,proxy
+HOST-SUFFIX,cdnlab.live,proxy
 HOST-SUFFIX,mushroomtrack.com,proxy
 
 # JYP Bubble (Dear U)

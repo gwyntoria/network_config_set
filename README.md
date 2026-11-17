@@ -28,14 +28,11 @@
 
 | 路径 | 用途 |
 | --- | --- |
-| [extend-script.js](clash-verge/extend-script.js) | Clash Verge Rev 全局扩展脚本 |
-| [rule-providers.yaml](clash-verge/rule-providers.yaml) | 扩展脚本依赖的 `rule-providers` 配置片段 |
-
-### 测试文件
-
-| 路径 | 用途 |
-| --- | --- |
-| [extend-script.test.js](clash-verge/extend-script.test.js) | 扩展脚本的回归测试 |
+| [global-extend-config.yaml](clash-verge/global-extend-config.yaml) | 全局公共 `rule-providers` |
+| [global-extend-script.js](clash-verge/global-extend-script.js) | 全局 DNS、fake-ip 和 DNS 例外 |
+| [profile-extend-config.yaml](clash-verge/profile-extend-config.yaml) | 当前 profile 的外部节点 `proxy-providers` 模板 |
+| [profile-extend-script.js](clash-verge/profile-extend-script.js) | 当前 profile 的节点整理、策略组和规则合并 |
+| [profile-prepend-rules.yaml](clash-verge/profile-prepend-rules.yaml) | 当前 profile 的自定义 rule |
 
 ## 使用说明
 
@@ -69,14 +66,23 @@ https://raw.githubusercontent.com/gwyntoria/network_config_set/main/rules/quantu
 
 **这些列表已包含策略。** 但使用时依然可以指定 `force-policy` 。
 
-### Clash Verge Rev 扩展脚本
+### Clash Verge Rev 扩展
 
-1. 将 `rule-providers.yaml` 复制到*全局拓展配置*。
-2. 将 `extend-script.js` 复制到*全局扩展脚本*。
+1. 将 [`global-extend-config.yaml`](clash-verge/global-extend-config.yaml) 复制到 *全局扩展配置（config）*。
+2. 将 [`global-extend-script.js`](clash-verge/global-extend-script.js) 复制到 *全局扩展脚本（script）*。
+3. 如果需要在一个订阅（profile）中使用另一个订阅的节点，右键需要使用外部订阅节点的订阅，将 [`profile-extend-config.yaml`](clash-verge/profile-extend-config.yaml) 复制到该订阅的*扩展配置*，填写其外部订阅来源；不需要外部节点时，不需要配置。
+4. 将 [`profile-extend-script.js`](clash-verge/profile-extend-script.js) 复制到该订阅的*扩展脚本*，按需调整主代理组、节点黑白名单和地区组。其他需要相同策略的订阅也分别配置。
 
-> **provider 和 脚本均可自定义，修改后需要保证拓展脚本引用的 provider 名称与拓展配置一致。**
+#### 拓展配置及脚本补充说明
 
-常用配置集中在脚本开头：
+clash verge rev 的执行顺序为：全局扩展配置 → 全局扩展脚本 → 订阅扩展配置 → 订阅扩展脚本。
+
+因此：
+
+- 全局拓展配置只包含公共规则集，全局拓展脚本只覆写公共 DNS 字段。
+- 订阅拓展配置才提供 `proxy-provider`，订阅拓展脚本才维护节点的筛选和顺序、规则集的新增。
+
+可自定义的配置，集中在订阅拓展脚本的开头，全局 DNS 则修改全局脚本的 `dnsOverrides`：
 
 - `profilePolicyMap`：profile 名称与代理组名称的对应关系。
 - `proxyPolicyCandidates`：profile 未命中时的代理组候选名称。
@@ -85,34 +91,21 @@ https://raw.githubusercontent.com/gwyntoria/network_config_set/main/rules/quantu
 - `excludedProxyNameRules`：节点名称黑名单。
 - `includedProxyNameRules`：节点名称白名单。非空时只保留命中的订阅节点；黑名单优先，空数组表示不限制。
 - `aiRuleProviderNames`、`tiktokRuleProviderNames`、`rejectRuleProviderNames`、`directRuleProviderNames` 与 `proxyRuleProviderNames`：provider 的分流策略。
-- `directRules` 与 `proxyRulePrefixes`：直接插入配置的自定义规则。
 
 脚本插入规则时采用以下顺序：
 
 ```text
-直连规则
 直连 provider 规则
 广告拦截规则
 AI 规则
 TikTok 规则
+...
+...
 代理 provider 规则
-强制代理规则
 订阅原有规则
 ```
 
 Mihomo 使用首条命中的规则，修改这些列表时需保留所需的优先级。
-`directRules` 要包含完整策略，`proxyRulePrefixes` 只填写规则前缀，
-脚本会自动补上当前 profile 对应的代理组。
-
-### 测试
-
-扩展脚本测试使用 Node.js 内置的测试运行器，不需要安装第三方依赖：
-
-```bash
-node --test clash-verge/extend-script.test.js
-```
-
-测试覆盖地区识别与稳定排序、未配置地区节点和代理组引用的保留、黑白名单筛选与优先级、AI/TikTok 组的选项与 PayPal 分流，以及脚本重复运行后的幂等性。
 
 ## 规则参考来源
 
