@@ -1,9 +1,9 @@
 # NAME: Game
 # POLICY: proxy
 # SOURCE: https://github.com/gwyntoria/network_config_set/blob/main/rules/clash/game-proxy.yaml
-# UPDATED: 2026-10-25
-# DOMAIN-SUFFIX: 31
-# TOTAL: 31
+# UPDATED: 2026-11-17
+# DOMAIN-SUFFIX: 21
+# TOTAL: 21
 payload:
   # Steam - Store & Web
   - DOMAIN-SUFFIX,s.team
@@ -23,20 +23,6 @@ payload:
 
   # Valve - Web
   - DOMAIN-SUFFIX,valvesoftware.com
-
-  # Epic Games - Platform & Support
-  - DOMAIN-SUFFIX,epicgames.com
-  - DOMAIN-SUFFIX,epicgames.dev
-  - DOMAIN-SUFFIX,helpshift.com
-
-  # Epic Games - Titles
-  - DOMAIN-SUFFIX,battlebreakers.com
-  - DOMAIN-SUFFIX,fortnite.com
-  - DOMAIN-SUFFIX,paragon.com
-  - DOMAIN-SUFFIX,playparagon.com
-  - DOMAIN-SUFFIX,roborecall.com
-  - DOMAIN-SUFFIX,shadowcomplex.com
-  - DOMAIN-SUFFIX,spyjinx.com
 
   # Unreal Engine
   - DOMAIN-SUFFIX,unrealengine.com

@@ -1,6 +1,6 @@
 # NAME: Game
 # SOURCE: https://github.com/gwyntoria/network_config_set/blob/main/rules/quantumult-x/game.list
-# UPDATED: 2026-10-25
+# UPDATED: 2026-11-17
 
 # Steam China - Platform
 HOST,csgo.wmsj.cn,direct
@@ -41,6 +41,20 @@ HOST-SUFFIX,eac-cdn.com,direct
 HOST-SUFFIX,easy.ac,direct
 HOST-SUFFIX,easyanticheat.net,direct
 
+# Epic Games - Platform & Support
+HOST-SUFFIX,epicgames.com,direct
+HOST-SUFFIX,epicgames.dev,direct
+HOST-SUFFIX,helpshift.com,direct
+
+# Epic Games - Titles
+HOST-SUFFIX,battlebreakers.com,direct
+HOST-SUFFIX,fortnite.com,direct
+HOST-SUFFIX,paragon.com,direct
+HOST-SUFFIX,playparagon.com,direct
+HOST-SUFFIX,roborecall.com,direct
+HOST-SUFFIX,shadowcomplex.com,direct
+HOST-SUFFIX,spyjinx.com,direct
+
 # Ubisoft - Download CDN
 HOST,uplaypc-s-ubisoft.cdn.ubi.com,direct
 
@@ -65,20 +79,6 @@ HOST-SUFFIX,steam.tv,proxy
 
 # Valve - Web
 HOST-SUFFIX,valvesoftware.com,proxy
-
-# Epic Games - Platform & Support
-HOST-SUFFIX,epicgames.com,proxy
-HOST-SUFFIX,epicgames.dev,proxy
-HOST-SUFFIX,helpshift.com,proxy
-
-# Epic Games - Titles
-HOST-SUFFIX,battlebreakers.com,proxy
-HOST-SUFFIX,fortnite.com,proxy
-HOST-SUFFIX,paragon.com,proxy
-HOST-SUFFIX,playparagon.com,proxy
-HOST-SUFFIX,roborecall.com,proxy
-HOST-SUFFIX,shadowcomplex.com,proxy
-HOST-SUFFIX,spyjinx.com,proxy
 
 # Unreal Engine
 HOST-SUFFIX,unrealengine.com,proxy

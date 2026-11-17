@@ -1,10 +1,10 @@
 # NAME: Game
 # POLICY: direct
 # SOURCE: https://github.com/gwyntoria/network_config_set/blob/main/rules/clash/game-direct.yaml
-# UPDATED: 2026-10-24
+# UPDATED: 2026-11-17
 # DOMAIN: 13
-# DOMAIN-SUFFIX: 16
-# TOTAL: 29
+# DOMAIN-SUFFIX: 26
+# TOTAL: 39
 payload:
   # Steam China - Platform
   - DOMAIN,csgo.wmsj.cn
@@ -44,6 +44,20 @@ payload:
   - DOMAIN-SUFFIX,eac-cdn.com
   - DOMAIN-SUFFIX,easy.ac
   - DOMAIN-SUFFIX,easyanticheat.net
+
+  # Epic Games - Platform & Support
+  - DOMAIN-SUFFIX,epicgames.com
+  - DOMAIN-SUFFIX,epicgames.dev
+  - DOMAIN-SUFFIX,helpshift.com
+
+  # Epic Games - Titles
+  - DOMAIN-SUFFIX,battlebreakers.com
+  - DOMAIN-SUFFIX,fortnite.com
+  - DOMAIN-SUFFIX,paragon.com
+  - DOMAIN-SUFFIX,playparagon.com
+  - DOMAIN-SUFFIX,roborecall.com
+  - DOMAIN-SUFFIX,shadowcomplex.com
+  - DOMAIN-SUFFIX,spyjinx.com
 
   # Ubisoft - Download CDN
   - DOMAIN,uplaypc-s-ubisoft.cdn.ubi.com
