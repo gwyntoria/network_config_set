@@ -1,6 +1,6 @@
 # NAME: Game
 # SOURCE: https://github.com/gwyntoria/network_config_set/blob/main/rules/quantumult-x/game.list
-# UPDATED: 2026-11-17
+# UPDATED: 2026-11-23
 
 # Steam China - Platform
 HOST,csgo.wmsj.cn,direct
@@ -36,14 +36,36 @@ HOST-SUFFIX,steamcdn-a.akamaihd.net,direct
 HOST-SUFFIX,steamstatic.com,direct
 HOST-SUFFIX,steamusercontent.com,direct
 
+# Epic Games - 平台后端 API（实测直连 240-300ms，与代理相当且更稳定）
+HOST-SUFFIX,ol.epicgames.com,direct
+HOST-SUFFIX,on.epicgames.com,direct
+HOST-SUFFIX,epicgames.dev,direct
+HOST,tracking.epicgames.com,direct
+
+# Epic Games - 下载与内容 CDN（实测直连 1.4-2.1MB/s，代理 0.3-0.7MB/s 且偶发 TLS 失败）
+HOST,download.epicgames.com,direct
+HOST,launcher.epicgames.com,direct
+HOST,cdn1.epicgames.com,direct
+HOST,cdn2.epicgames.com,direct
+HOST,cdn1.unrealengine.com,direct
+HOST,cdn2.unrealengine.com,direct
+HOST,epicgames-download1.akamaized.net,direct
+HOST-SUFFIX,epicgamescdn.com,direct
+HOST-REGEX,^epicgames-download\d+-\d+\.file\.myqcloud\.com$,direct
+HOST-REGEX,^cdn\d+-epicgames-\d+\.file\.myqcloud\.com$,direct
+
+# Epic Games - 网页与静态资源（实测直连中位数不劣于代理）
+HOST,epicgames.com,direct
+HOST,www.epicgames.com,direct
+HOST,static-assets-prod.epicgames.com,direct
+HOST,dev.epicgames.com,direct
+
 # Epic Games - Anti-Cheat
 HOST-SUFFIX,eac-cdn.com,direct
 HOST-SUFFIX,easy.ac,direct
 HOST-SUFFIX,easyanticheat.net,direct
 
-# Epic Games - Platform & Support
-HOST-SUFFIX,epicgames.com,direct
-HOST-SUFFIX,epicgames.dev,direct
+# Epic Games - 帮助站点
 HOST-SUFFIX,helpshift.com,direct
 
 # Epic Games - Titles
@@ -79,6 +101,22 @@ HOST-SUFFIX,steam.tv,proxy
 
 # Valve - Web
 HOST-SUFFIX,valvesoftware.com,proxy
+
+# Epic Games - 商店与账号页面（Cloudflare；实测代理 235-292ms，直连 838-891ms）
+HOST-SUFFIX,store.epicgames.com,proxy
+HOST-SUFFIX,accounts.epicgames.com,proxy
+
+# Epic Games - 分发与旧 CDN（实测直连失败或低于 100KB/s）
+HOST,egdownload.fastly-edge.com,proxy
+HOST,epicgames.global.ssl.fastly.net,proxy
+
+# Epic Games - 社区与资产站（实测代理 49-61ms，直连 185-304ms）
+HOST-SUFFIX,artstation.com,proxy
+HOST-SUFFIX,fab.com,proxy
+HOST-SUFFIX,sketchfab.com,proxy
+
+# Epic Games - 其余 epicgames.com 域名兜底；直连清单更靠前优先命中
+HOST-SUFFIX,epicgames.com,proxy
 
 # Unreal Engine
 HOST-SUFFIX,unrealengine.com,proxy

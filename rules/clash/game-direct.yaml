@@ -1,10 +1,11 @@
 # NAME: Game
 # POLICY: direct
 # SOURCE: https://github.com/gwyntoria/network_config_set/blob/main/rules/clash/game-direct.yaml
-# UPDATED: 2026-11-17
-# DOMAIN: 13
-# DOMAIN-SUFFIX: 26
-# TOTAL: 39
+# UPDATED: 2026-11-23
+# DOMAIN: 25
+# DOMAIN-SUFFIX: 28
+# DOMAIN-REGEX: 2
+# TOTAL: 55
 payload:
   # Steam China - Platform
   - DOMAIN,csgo.wmsj.cn
@@ -40,14 +41,36 @@ payload:
   - DOMAIN-SUFFIX,steamstatic.com
   - DOMAIN-SUFFIX,steamusercontent.com
 
+  # Epic Games - 平台后端 API（实测直连 240-300ms，与代理相当且更稳定）
+  - DOMAIN-SUFFIX,ol.epicgames.com
+  - DOMAIN-SUFFIX,on.epicgames.com
+  - DOMAIN-SUFFIX,epicgames.dev
+  - DOMAIN,tracking.epicgames.com
+
+  # Epic Games - 下载与内容 CDN（实测直连 1.4-2.1MB/s，代理 0.3-0.7MB/s 且偶发 TLS 失败）
+  - DOMAIN,download.epicgames.com
+  - DOMAIN,launcher.epicgames.com
+  - DOMAIN,cdn1.epicgames.com
+  - DOMAIN,cdn2.epicgames.com
+  - DOMAIN,cdn1.unrealengine.com
+  - DOMAIN,cdn2.unrealengine.com
+  - DOMAIN,epicgames-download1.akamaized.net
+  - DOMAIN-SUFFIX,epicgamescdn.com
+  - DOMAIN-REGEX,^epicgames-download\d+-\d+\.file\.myqcloud\.com$
+  - DOMAIN-REGEX,^cdn\d+-epicgames-\d+\.file\.myqcloud\.com$
+
+  # Epic Games - 网页与静态资源（实测直连中位数不劣于代理）
+  - DOMAIN,epicgames.com
+  - DOMAIN,www.epicgames.com
+  - DOMAIN,static-assets-prod.epicgames.com
+  - DOMAIN,dev.epicgames.com
+
   # Epic Games - Anti-Cheat
   - DOMAIN-SUFFIX,eac-cdn.com
   - DOMAIN-SUFFIX,easy.ac
   - DOMAIN-SUFFIX,easyanticheat.net
 
-  # Epic Games - Platform & Support
-  - DOMAIN-SUFFIX,epicgames.com
-  - DOMAIN-SUFFIX,epicgames.dev
+  # Epic Games - 帮助站点
   - DOMAIN-SUFFIX,helpshift.com
 
   # Epic Games - Titles
