@@ -2,16 +2,15 @@
 # POLICY: proxy
 # SOURCE: https://github.com/gwyntoria/network_config_set/blob/main/rules/clash/game-proxy.yaml
 # UPDATED: 2026-11-23
-# DOMAIN: 2
-# DOMAIN-SUFFIX: 27
-# TOTAL: 29
+# DOMAIN: 3
+# DOMAIN-SUFFIX: 30
+# TOTAL: 33
 payload:
   # Steam - Store & Web
   - DOMAIN-SUFFIX,s.team
   - DOMAIN-SUFFIX,steamdeck.com
   - DOMAIN-SUFFIX,steamgames.com
   - DOMAIN-SUFFIX,steampowered.com
-  - DOMAIN-SUFFIX,steamstat.us
 
   # Steam - Community & Chat
   - DOMAIN-SUFFIX,steam-chat.com
@@ -21,6 +20,15 @@ payload:
   # Steam - API & Streaming
   - DOMAIN-SUFFIX,steam-api.com
   - DOMAIN-SUFFIX,steam.tv
+
+  # Steam - 商店静态资源（实测代理 47-53ms，直连 171-208ms）
+  - DOMAIN-SUFFIX,steamstatic.com
+  - DOMAIN-SUFFIX,steamcdn-a.akamaihd.net
+
+  # Steam - 海外内容 CDN（实测代理 49-95ms，直连 207-248ms）
+  - DOMAIN-SUFFIX,steampipe.akamaized.net
+  - DOMAIN,st.dl.pinyuncloud.com
+  - DOMAIN-SUFFIX,steamcontent.net
 
   # Valve - Web
   - DOMAIN-SUFFIX,valvesoftware.com

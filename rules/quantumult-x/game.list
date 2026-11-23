@@ -3,38 +3,36 @@
 # UPDATED: 2026-11-23
 
 # Steam China - Platform
-HOST,csgo.wmsj.cn,direct
-HOST,dota2.wmsj.cn,direct
-HOST,wmsjsteam.com,direct
 HOST-SUFFIX,steamchina.com,direct
 
-# Steam China - Download CDN
+# Steam China - Download CDN（实测直连 17-26ms，代理 86-783ms）
 HOST,dl.steam.clngaa.com,direct
-HOST,dl.steam.ksyna.com,direct
 HOST,st.dl.bscstorage.net,direct
 HOST,st.dl.eccdnx.com,direct
-HOST,st.dl.pinyuncloud.com,direct
-HOST,steampipe.steamcontent.tnkjmec.com,direct
-HOST,steampowered.com.8686c.com,direct
-HOST,steamstatic.com.8686c.com,direct
 HOST,xz.pphimalayanrt.com,direct
 
-# Steam - 下载协商与控制通道
+# Steam - 下载协商与控制通道（api 决定下发哪套内容服务器，必须直连）
 HOST-SUFFIX,api.steampowered.com,direct
 HOST-SUFFIX,cdn.steampowered.com,direct
 HOST-SUFFIX,client-download.steampowered.com,direct
 HOST-SUFFIX,media.steampowered.com,direct
 
-# Steam - Content & Download CDN
+# Steam - 内容 CDN（国内内容服务器）
 HOST-SUFFIX,cm.steampowered.com,direct
 HOST-SUFFIX,steamcontent.com,direct
-HOST-SUFFIX,steamcontent.net,direct
 HOST-SUFFIX,steamserver.net,direct
 
-# Steam - Static & User Content CDN
-HOST-SUFFIX,steamcdn-a.akamaihd.net,direct
-HOST-SUFFIX,steamstatic.com,direct
+# Steam - 客户端更新（批量；其余 steamstatic 资源见 proxy 段）
+HOST,cdn.steamstatic.com,direct
+HOST,client-update.steamstatic.com,direct
+HOST,client-update.akamai.steamstatic.com,direct
+HOST,client-update.fastly.steamstatic.com,direct
+
+# Steam - 用户内容 CDN
 HOST-SUFFIX,steamusercontent.com,direct
+
+# Steam - 第三方状态站（实测直连 617ms，代理 667-3609ms）
+HOST,steamstat.us,direct
 
 # Epic Games - 平台后端 API（实测直连 240-300ms，与代理相当且更稳定）
 HOST-SUFFIX,ol.epicgames.com,direct
@@ -88,7 +86,6 @@ HOST-SUFFIX,s.team,proxy
 HOST-SUFFIX,steamdeck.com,proxy
 HOST-SUFFIX,steamgames.com,proxy
 HOST-SUFFIX,steampowered.com,proxy
-HOST-SUFFIX,steamstat.us,proxy
 
 # Steam - Community & Chat
 HOST-SUFFIX,steam-chat.com,proxy
@@ -98,6 +95,15 @@ HOST-SUFFIX,steamcommunity.com,proxy
 # Steam - API & Streaming
 HOST-SUFFIX,steam-api.com,proxy
 HOST-SUFFIX,steam.tv,proxy
+
+# Steam - 商店静态资源（实测代理 47-53ms，直连 171-208ms）
+HOST-SUFFIX,steamstatic.com,proxy
+HOST-SUFFIX,steamcdn-a.akamaihd.net,proxy
+
+# Steam - 海外内容 CDN（实测代理 49-95ms，直连 207-248ms）
+HOST-SUFFIX,steampipe.akamaized.net,proxy
+HOST,st.dl.pinyuncloud.com,proxy
+HOST-SUFFIX,steamcontent.net,proxy
 
 # Valve - Web
 HOST-SUFFIX,valvesoftware.com,proxy

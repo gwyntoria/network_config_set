@@ -2,44 +2,42 @@
 # POLICY: direct
 # SOURCE: https://github.com/gwyntoria/network_config_set/blob/main/rules/clash/game-direct.yaml
 # UPDATED: 2026-11-23
-# DOMAIN: 25
-# DOMAIN-SUFFIX: 28
+# DOMAIN: 22
+# DOMAIN-SUFFIX: 25
 # DOMAIN-REGEX: 2
-# TOTAL: 55
+# TOTAL: 49
 payload:
   # Steam China - Platform
-  - DOMAIN,csgo.wmsj.cn
-  - DOMAIN,dota2.wmsj.cn
-  - DOMAIN,wmsjsteam.com
   - DOMAIN-SUFFIX,steamchina.com
 
-  # Steam China - Download CDN
+  # Steam China - Download CDN（实测直连 17-26ms，代理 86-783ms）
   - DOMAIN,dl.steam.clngaa.com
-  - DOMAIN,dl.steam.ksyna.com
   - DOMAIN,st.dl.bscstorage.net
   - DOMAIN,st.dl.eccdnx.com
-  - DOMAIN,st.dl.pinyuncloud.com
-  - DOMAIN,steampipe.steamcontent.tnkjmec.com
-  - DOMAIN,steampowered.com.8686c.com
-  - DOMAIN,steamstatic.com.8686c.com
   - DOMAIN,xz.pphimalayanrt.com
 
-  # Steam - 下载协商与控制通道
+  # Steam - 下载协商与控制通道（api 决定下发哪套内容服务器，必须直连）
   - DOMAIN-SUFFIX,api.steampowered.com
   - DOMAIN-SUFFIX,cdn.steampowered.com
   - DOMAIN-SUFFIX,client-download.steampowered.com
   - DOMAIN-SUFFIX,media.steampowered.com
 
-  # Steam - Content & Download CDN
+  # Steam - 内容 CDN（国内内容服务器）
   - DOMAIN-SUFFIX,cm.steampowered.com
   - DOMAIN-SUFFIX,steamcontent.com
-  - DOMAIN-SUFFIX,steamcontent.net
   - DOMAIN-SUFFIX,steamserver.net
 
-  # Steam - Static & User Content CDN
-  - DOMAIN-SUFFIX,steamcdn-a.akamaihd.net
-  - DOMAIN-SUFFIX,steamstatic.com
+  # Steam - 客户端更新（批量；其余 steamstatic 资源见 game-proxy）
+  - DOMAIN,cdn.steamstatic.com
+  - DOMAIN,client-update.steamstatic.com
+  - DOMAIN,client-update.akamai.steamstatic.com
+  - DOMAIN,client-update.fastly.steamstatic.com
+
+  # Steam - 用户内容 CDN
   - DOMAIN-SUFFIX,steamusercontent.com
+
+  # Steam - 第三方状态站（实测直连 617ms，代理 667-3609ms）
+  - DOMAIN,steamstat.us
 
   # Epic Games - 平台后端 API（实测直连 240-300ms，与代理相当且更稳定）
   - DOMAIN-SUFFIX,ol.epicgames.com
