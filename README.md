@@ -66,6 +66,8 @@ https://raw.githubusercontent.com/gwyntoria/network_config_set/main/rules/quantu
 
 **这些列表已包含策略。** 但使用时依然可以指定 `force-policy` 。
 
+Quantumult X 的分流类型只有 `HOST`、`HOST-SUFFIX`、`HOST-WILDCARD`、`HOST-KEYWORD`、`USER-AGENT`、`IP-CIDR`、`IP6-CIDR`、`IP-ASN`、`GEOIP`，不支持 `HOST-REGEX`。Clash 规则中的 `DOMAIN-REGEX` 在 QX 列表里用 `HOST-WILDCARD` 等价表达（`*` 匹配任意字符），因此两边条目数可能不同。
+
 ### Clash Verge Rev 扩展
 
 1. 将 [`global-extend-config.yaml`](clash-verge/global-extend-config.yaml) 复制到 *全局扩展配置（config）*。

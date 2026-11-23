@@ -51,8 +51,8 @@ HOST,cdn1.unrealengine.com,direct
 HOST,cdn2.unrealengine.com,direct
 HOST,epicgames-download1.akamaized.net,direct
 HOST-SUFFIX,epicgamescdn.com,direct
-HOST-REGEX,^epicgames-download\d+-\d+\.file\.myqcloud\.com$,direct
-HOST-REGEX,^cdn\d+-epicgames-\d+\.file\.myqcloud\.com$,direct
+HOST-WILDCARD,epicgames-download*.file.myqcloud.com,direct
+HOST-WILDCARD,cdn*-epicgames-*.file.myqcloud.com,direct
 
 # Epic Games - 网页与静态资源（实测直连中位数不劣于代理）
 HOST,epicgames.com,direct
