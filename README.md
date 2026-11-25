@@ -12,6 +12,7 @@
 | --- | --- |
 | [ad.yaml](rules/clash/ad.yaml) | 广告拦截规则 |
 | [anthropic.yaml](rules/clash/anthropic.yaml) | Anthropic 代理规则 |
+| [openai.yaml](rules/clash/openai.yaml) | OpenAI 代理规则 |
 | [game-direct.yaml](rules/clash/game-direct.yaml) | 游戏下载与国内服务直连规则 |
 | [game-proxy.yaml](rules/clash/game-proxy.yaml) | 游戏商店、社区与账号服务代理规则 |
 
@@ -21,6 +22,7 @@
 | --- | --- |
 | [ad.list](rules/quantumult-x/ad.list) | 广告拦截规则 |
 | [anthropic.list](rules/quantumult-x/anthropic.list) | Anthropic 代理规则 |
+| [openai.list](rules/quantumult-x/openai.list) | OpenAI 代理规则 |
 | [game.list](rules/quantumult-x/game.list) | 游戏平台分流规则 |
 | [personality.list](rules/quantumult-x/personality.list) | 自用补充规则 |
 
@@ -113,4 +115,5 @@ Mihomo 使用首条命中的规则，修改这些列表时需保留所需的优�
 
 - 广告规则：[earoftoast/clash-rules](https://github.com/earoftoast/clash-rules)。
 - Anthropic 规则： [xiaolai/anthropic-claude-surge-rules-set](https://github.com/xiaolai/anthropic-claude-surge-rules-set)。
+- OpenAI 规则：[OpenAI 官方网络建议](https://help.openai.com/en/articles/9247338-network-recommendations-for-chatgpt-errors-on-web-and-apps)。
 - 游戏平台规则： [blackmatrix7/ios_rule_script](https://github.com/blackmatrix7/ios_rule_script)。

@@ -1,0 +1,56 @@
+name: Sync OpenAI voice ranges
+
+on:
+  schedule:
+    # 每周二美西时间 10:00 触发，只有每四周的检查日才同步。
+    - cron: '0 10 * * 2'
+      timezone: America/Los_Angeles
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-openai-voice
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check four-week schedule
+        id: cadence
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+            echo 'due=true' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          from datetime import date, datetime
+          from zoneinfo import ZoneInfo
+
+          first_tuesday = date(2026, 12, 1)
+          today = datetime.now(ZoneInfo("America/Los_Angeles")).date()
+          elapsed_days = (today - first_tuesday).days
+          due = elapsed_days >= 0 and elapsed_days % 28 == 0
+          print(f"due={str(due).lower()}")
+          PY
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        if: steps.cadence.outputs.due == 'true'
+        with:
+          ref: main
+      - name: Sync official snapshot
+        if: steps.cadence.outputs.due == 'true'
+        run: python3 scripts/sync-openai-voice.py
+      - name: Commit updated rules
+        if: steps.cadence.outputs.due == 'true'
+        run: |
+          git add -- rules/clash/openai.yaml rules/quantumult-x/openai.list
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git diff --cached --check
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'chore: sync OpenAI voice ranges'
+          git push origin HEAD:refs/heads/main
