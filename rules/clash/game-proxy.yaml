@@ -1,10 +1,10 @@
 # NAME: Game
 # POLICY: proxy
 # SOURCE: https://raw.githubusercontent.com/gwyntoria/network_config_set/refs/heads/main/rules/clash/game-proxy.yaml
-# UPDATED: 2026-11-23
-# DOMAIN: 3
-# DOMAIN-SUFFIX: 30
-# TOTAL: 33
+# UPDATED: 2026-11-26
+# DOMAIN: 10
+# DOMAIN-SUFFIX: 32
+# TOTAL: 42
 payload:
   # Steam - Store & Web
   - DOMAIN-SUFFIX,s.team
@@ -32,6 +32,18 @@ payload:
 
   # Valve - Web
   - DOMAIN-SUFFIX,valvesoftware.com
+
+  # Epic Games - 分发与内容 CDN（CloudFront 承载；直连时解析到的边缘节点在国内
+  # TLS 握手不可用，启动器更新失败、官网下载只有几十 KB/s，改走代理由节点就近选路）
+  - DOMAIN-SUFFIX,on.epicgames.com
+  - DOMAIN,download.epicgames.com
+  - DOMAIN,launcher.epicgames.com
+  - DOMAIN,cdn1.epicgames.com
+  - DOMAIN,cdn2.epicgames.com
+  - DOMAIN,cdn1.unrealengine.com
+  - DOMAIN,cdn2.unrealengine.com
+  - DOMAIN,epicgames-download1.akamaized.net
+  - DOMAIN-SUFFIX,epicgamescdn.com
 
   # Epic Games - 商店与账号页面（Cloudflare；实测代理 235-292ms，直连 838-891ms）
   - DOMAIN-SUFFIX,store.epicgames.com

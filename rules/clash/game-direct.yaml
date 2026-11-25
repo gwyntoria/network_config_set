@@ -1,11 +1,11 @@
 # NAME: Game
 # POLICY: direct
 # SOURCE: https://raw.githubusercontent.com/gwyntoria/network_config_set/refs/heads/main/rules/clash/game-direct.yaml
-# UPDATED: 2026-11-23
-# DOMAIN: 22
-# DOMAIN-SUFFIX: 25
+# UPDATED: 2026-11-26
+# DOMAIN: 15
+# DOMAIN-SUFFIX: 23
 # DOMAIN-REGEX: 2
-# TOTAL: 49
+# TOTAL: 40
 payload:
   # Steam China - Platform
   - DOMAIN-SUFFIX,steamchina.com
@@ -41,19 +41,10 @@ payload:
 
   # Epic Games - 平台后端 API（实测直连 240-300ms，与代理相当且更稳定）
   - DOMAIN-SUFFIX,ol.epicgames.com
-  - DOMAIN-SUFFIX,on.epicgames.com
   - DOMAIN-SUFFIX,epicgames.dev
   - DOMAIN,tracking.epicgames.com
 
-  # Epic Games - 下载与内容 CDN（实测直连 1.4-2.1MB/s，代理 0.3-0.7MB/s 且偶发 TLS 失败）
-  - DOMAIN,download.epicgames.com
-  - DOMAIN,launcher.epicgames.com
-  - DOMAIN,cdn1.epicgames.com
-  - DOMAIN,cdn2.epicgames.com
-  - DOMAIN,cdn1.unrealengine.com
-  - DOMAIN,cdn2.unrealengine.com
-  - DOMAIN,epicgames-download1.akamaized.net
-  - DOMAIN-SUFFIX,epicgamescdn.com
+  # Epic Games - 国内内容 CDN（腾讯云；直连远优于代理）
   - DOMAIN-REGEX,^epicgames-download\d+-\d+\.file\.myqcloud\.com$
   - DOMAIN-REGEX,^cdn\d+-epicgames-\d+\.file\.myqcloud\.com$
 

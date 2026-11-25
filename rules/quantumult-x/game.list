@@ -1,6 +1,6 @@
 # NAME: Game
 # SOURCE: https://raw.githubusercontent.com/gwyntoria/network_config_set/refs/heads/main/rules/quantumult-x/game.list
-# UPDATED: 2026-11-23
+# UPDATED: 2026-11-26
 
 # Steam China - Platform
 HOST-SUFFIX,steamchina.com,direct
@@ -36,19 +36,10 @@ HOST,steamstat.us,direct
 
 # Epic Games - 平台后端 API（实测直连 240-300ms，与代理相当且更稳定）
 HOST-SUFFIX,ol.epicgames.com,direct
-HOST-SUFFIX,on.epicgames.com,direct
 HOST-SUFFIX,epicgames.dev,direct
 HOST,tracking.epicgames.com,direct
 
-# Epic Games - 下载与内容 CDN（实测直连 1.4-2.1MB/s，代理 0.3-0.7MB/s 且偶发 TLS 失败）
-HOST,download.epicgames.com,direct
-HOST,launcher.epicgames.com,direct
-HOST,cdn1.epicgames.com,direct
-HOST,cdn2.epicgames.com,direct
-HOST,cdn1.unrealengine.com,direct
-HOST,cdn2.unrealengine.com,direct
-HOST,epicgames-download1.akamaized.net,direct
-HOST-SUFFIX,epicgamescdn.com,direct
+# Epic Games - 国内内容 CDN（腾讯云；直连远优于代理）
 HOST-WILDCARD,epicgames-download*.file.myqcloud.com,direct
 HOST-WILDCARD,cdn*-epicgames-*.file.myqcloud.com,direct
 
@@ -107,6 +98,18 @@ HOST-SUFFIX,steamcontent.net,proxy
 
 # Valve - Web
 HOST-SUFFIX,valvesoftware.com,proxy
+
+# Epic Games - 分发与内容 CDN（CloudFront 承载；直连时解析到的边缘节点在国内
+# TLS 握手不可用，启动器更新失败、官网下载只有几十 KB/s，改走代理由节点就近选路）
+HOST-SUFFIX,on.epicgames.com,proxy
+HOST,download.epicgames.com,proxy
+HOST,launcher.epicgames.com,proxy
+HOST,cdn1.epicgames.com,proxy
+HOST,cdn2.epicgames.com,proxy
+HOST,cdn1.unrealengine.com,proxy
+HOST,cdn2.unrealengine.com,proxy
+HOST,epicgames-download1.akamaized.net,proxy
+HOST-SUFFIX,epicgamescdn.com,proxy
 
 # Epic Games - 商店与账号页面（Cloudflare；实测代理 235-292ms，直连 838-891ms）
 HOST-SUFFIX,store.epicgames.com,proxy
