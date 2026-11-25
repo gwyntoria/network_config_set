@@ -1,18 +1,24 @@
 # NAME: Anthropic / Claude
 # SOURCE: https://github.com/gwyntoria/network_config_set/blob/main/rules/quantumult-x/anthropic.list
+# REFERENCE: https://code.claude.com/docs/en/network-config#network-access-requirements
+# REFERENCE: https://code.claude.com/docs/en/desktop#network-access-requirements
+# REFERENCE: https://platform.claude.com/docs/en/api/ip-addresses#inbound-ip-addresses
 # REFERENCE: https://github.com/xiaolai/anthropic-claude-surge-rules-set
-# UPDATED: 2026-04-14
+# UPDATED: 2026-11-25
 
 HOST-SUFFIX,anthropic.com,proxy
 HOST-SUFFIX,claude.ai,proxy
 HOST-SUFFIX,claude.com,proxy
+HOST-SUFFIX,claude.app,proxy
 HOST-SUFFIX,claudeusercontent.com,proxy
+HOST-SUFFIX,claudemcpcontent.com,proxy
 HOST-SUFFIX,clau.de,proxy
 HOST-SUFFIX,modelcontextprotocol.io,proxy
-HOST,downloads.claude.ai,proxy
+# Google Cloud Storage 共享主机。Claude Code 用它获取插件元数据，旧版也用它更新。
 HOST,storage.googleapis.com,proxy
 HOST,cdn.growthbook.io,proxy
-IP-CIDR,160.79.104.0/23,proxy,no-resolve
-IP-CIDR,160.79.104.0/21,proxy,no-resolve
-IP6-CIDR,2607:6bc0::/48,proxy,no-resolve
 HOST,cdn.usefathom.com,proxy
+# Anthropic 官方入站网段。
+IP-CIDR,160.79.104.0/23,proxy,no-resolve
+IP-CIDR,153.61.224.0/22,proxy,no-resolve
+IP6-CIDR,2607:6bc0::/48,proxy,no-resolve

@@ -1,24 +1,30 @@
 # NAME: Anthropic / Claude
 # POLICY: proxy
 # SOURCE: https://github.com/gwyntoria/network_config_set/blob/main/rules/clash/anthropic.yaml
+# REFERENCE: https://code.claude.com/docs/en/network-config#network-access-requirements
+# REFERENCE: https://code.claude.com/docs/en/desktop#network-access-requirements
+# REFERENCE: https://platform.claude.com/docs/en/api/ip-addresses#inbound-ip-addresses
 # REFERENCE: https://github.com/xiaolai/anthropic-claude-surge-rules-set
-# UPDATED: 2026-04-14
-# DOMAIN: 4
-# DOMAIN-SUFFIX: 6
+# UPDATED: 2026-11-25
+# DOMAIN: 3
+# DOMAIN-SUFFIX: 8
 # IP-CIDR: 2
 # IP-CIDR6: 1
-# TOTAL: 13
+# TOTAL: 14
 payload:
   - DOMAIN-SUFFIX,anthropic.com
   - DOMAIN-SUFFIX,claude.ai
   - DOMAIN-SUFFIX,claude.com
+  - DOMAIN-SUFFIX,claude.app
   - DOMAIN-SUFFIX,claudeusercontent.com
+  - DOMAIN-SUFFIX,claudemcpcontent.com
   - DOMAIN-SUFFIX,clau.de
   - DOMAIN-SUFFIX,modelcontextprotocol.io
-  - DOMAIN,downloads.claude.ai
+  # Google Cloud Storage 共享主机。Claude Code 用它获取插件元数据，旧版也用它更新。
   - DOMAIN,storage.googleapis.com
   - DOMAIN,cdn.growthbook.io
-  - IP-CIDR,160.79.104.0/23,no-resolve
-  - IP-CIDR,160.79.104.0/21,no-resolve
-  - IP-CIDR6,2607:6bc0::/48,no-resolve
   - DOMAIN,cdn.usefathom.com
+  # Anthropic 官方入站网段。
+  - IP-CIDR,160.79.104.0/23,no-resolve
+  - IP-CIDR,153.61.224.0/22,no-resolve
+  - IP-CIDR6,2607:6bc0::/48,no-resolve
