@@ -12,6 +12,7 @@
 | --- | --- |
 | [ad.yaml](rules/clash/ad.yaml) | 广告拦截规则 |
 | [anthropic.yaml](rules/clash/anthropic.yaml) | Anthropic 代理规则 |
+| [gemini.yaml](rules/clash/gemini.yaml) | Gemini、Google AI Studio 和 Gemini API 代理规则 |
 | [openai.yaml](rules/clash/openai.yaml) | OpenAI 代理规则 |
 | [game-direct.yaml](rules/clash/game-direct.yaml) | 游戏下载与国内服务直连规则 |
 | [game-proxy.yaml](rules/clash/game-proxy.yaml) | 游戏商店、社区与账号服务代理规则 |
@@ -22,6 +23,7 @@
 | --- | --- |
 | [ad.list](rules/quantumult-x/ad.list) | 广告拦截规则 |
 | [anthropic.list](rules/quantumult-x/anthropic.list) | Anthropic 代理规则 |
+| [gemini.list](rules/quantumult-x/gemini.list) | Gemini、Google AI Studio 和 Gemini API 代理规则 |
 | [openai.list](rules/quantumult-x/openai.list) | OpenAI 代理规则 |
 | [game.list](rules/quantumult-x/game.list) | 游戏平台分流规则 |
 | [personality.list](rules/quantumult-x/personality.list) | 自用补充规则 |
@@ -31,7 +33,7 @@
 | 路径 | 用途 |
 | --- | --- |
 | [global-extend-config.yaml](clash-verge/global-extend-config.yaml) | 全局公共 `rule-providers` |
-| [global-extend-script.js](clash-verge/global-extend-script.js) | 全局 DNS、fake-ip 和 DNS 例外 |
+| [global-extend-script.js](clash-verge/global-extend-script.js) | 全局 DNS、fake-ip 和 QUIC 域名嗅探 |
 | [profile-extend-config.yaml](clash-verge/profile-extend-config.yaml) | 当前 profile 的外部节点 `proxy-providers` 模板 |
 | [profile-extend-script.js](clash-verge/profile-extend-script.js) | 当前 profile 的节点整理、策略组和规则合并 |
 | [profile-prepend-rules.yaml](clash-verge/profile-prepend-rules.yaml) | 当前 profile 的自定义 rule |
@@ -83,7 +85,7 @@ clash verge rev 的执行顺序为：全局扩展配置 → 全局扩展脚本 �
 
 因此：
 
-- 全局拓展配置只包含公共规则集，全局拓展脚本只覆写公共 DNS 字段。
+- 全局扩展配置提供公共规则集，全局扩展脚本设置公共 DNS 并合并 QUIC 域名嗅探配置。
 - 订阅拓展配置才提供 `proxy-provider`，订阅拓展脚本才维护节点的筛选和顺序、规则集的新增。
 
 可自定义的配置，集中在订阅拓展脚本的开头，全局 DNS 则修改全局脚本的 `dnsOverrides`：
@@ -115,5 +117,6 @@ Mihomo 使用首条命中的规则，修改这些列表时需保留所需的优�
 
 - 广告规则：[earoftoast/clash-rules](https://github.com/earoftoast/clash-rules)。
 - Anthropic 规则： [xiaolai/anthropic-claude-surge-rules-set](https://github.com/xiaolai/anthropic-claude-surge-rules-set)。
+- Gemini 规则：[blackmatrix7 的 Gemini 规则](https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Gemini/Gemini.yaml)、[Google AI Studio](https://aistudio.google.com/)。
 - OpenAI 规则：[OpenAI 官方网络建议](https://help.openai.com/en/articles/9247338-network-recommendations-for-chatgpt-errors-on-web-and-apps)。
 - 游戏平台规则： [blackmatrix7/ios_rule_script](https://github.com/blackmatrix7/ios_rule_script)。

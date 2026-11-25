@@ -1,0 +1,58 @@
+# NAME: Gemini
+# POLICY: proxy
+# SOURCE: https://github.com/gwyntoria/network_config_set/blob/main/rules/clash/gemini.yaml
+# REFERENCE: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Gemini/Gemini.yaml
+# REFERENCE: https://antigravity.google/download
+# REFERENCE: https://antigravity.google/docs/enterprise#network-allowlists-and-mtls-endpoints
+# UPDATED: 2026-11-25
+# DOMAIN: 25
+# DOMAIN-KEYWORD: 3
+# DOMAIN-SUFFIX: 7
+# TOTAL: 35
+payload:
+  # Gemini 网页、Bard 旧入口与静态资源。
+  - DOMAIN-SUFFIX,gemini.google.com
+  - DOMAIN-SUFFIX,bard.google.com
+  - DOMAIN,gemini.gstatic.com
+
+  # Google AI Studio、MakerSuite 旧入口与 Gemini Developer API。
+  - DOMAIN,aistudio.google.com
+  - DOMAIN,makersuite.google.com
+  - DOMAIN,alkalimakersuite-pa.clients6.google.com
+  - DOMAIN,ai.google.dev
+  - DOMAIN-KEYWORD,generativelanguage
+
+  # Google AI 相关站点、Colab 与开发者资料。
+  - DOMAIN-SUFFIX,deepmind.com
+  - DOMAIN-SUFFIX,deepmind.google
+  - DOMAIN-SUFFIX,generativeai.google
+  - DOMAIN-KEYWORD,colab
+  - DOMAIN-KEYWORD,developerprofiles
+
+  # Google API、Gemini 相关后端与共享存储（含 Antigravity 安装包）。
+  - DOMAIN-SUFFIX,apis.google.com
+  - DOMAIN-SUFFIX,proactivebackend-pa.googleapis.com
+  - DOMAIN,storage.googleapis.com
+
+  # Antigravity 官网、Web 应用、CLI 发布清单和独立 IDE 下载。
+  - DOMAIN,antigravity.google
+  - DOMAIN,antigravity.google.com
+  - DOMAIN,antigravity-cli-auto-updater-974169037036.us-central1.run.app
+  - DOMAIN,edgedl.me.gvt1.com
+
+  # Antigravity 企业版 API（含区域和 mTLS 端点）。
+  - DOMAIN,aiplatform.googleapis.com
+  - DOMAIN,aiplatform.eu.rep.googleapis.com
+  - DOMAIN,aiplatform.mtls.googleapis.com
+  - DOMAIN,aiplatform.us.rep.googleapis.com
+  - DOMAIN,businessaicode.googleapis.com
+  - DOMAIN,businessaicode.eu.rep.googleapis.com
+  - DOMAIN,businessaicode.mtls.googleapis.com
+  - DOMAIN,businessaicode.us.rep.googleapis.com
+  - DOMAIN,cloudcode-pa.googleapis.com
+  - DOMAIN,discoveryengine.googleapis.com
+  - DOMAIN,discoveryengine.mtls.googleapis.com
+  - DOMAIN,eu-discoveryengine.googleapis.com
+  - DOMAIN,eu-discoveryengine.mtls.googleapis.com
+  - DOMAIN,us-discoveryengine.googleapis.com
+  - DOMAIN,us-discoveryengine.mtls.googleapis.com

@@ -1,4 +1,4 @@
-/** Clash Verge Rev 全局扩展脚本：只维护公共 DNS，不修改节点、代理组或规则。 */
+/** Clash Verge Rev 全局扩展脚本：维护公共 DNS 和 QUIC 域名嗅探。 */
 
 // 强制写入 Mihomo 的 DNS 配置，整体替换订阅自带或 GUI「DNS 覆写」中的对应字段。
 // 目的：
@@ -46,7 +46,30 @@ function applyDnsOverrides(config) {
   config.dns = { ...currentDns, ...dnsOverrides };
 }
 
+function applyQuicSniffing(config) {
+  const sniffer = config.sniffer ?? {};
+  const protocols = sniffer.sniff ?? {};
+  const quic = protocols.QUIC ?? {};
+  const ports = Array.isArray(quic.ports) ? quic.ports : [];
+
+  // 从纯 IP 的 UDP/443 连接识别域名，默认保留 QUIC 连接的原目标。
+  config.sniffer = {
+    ...sniffer,
+    enable: true,
+    "parse-pure-ip": true,
+    sniff: {
+      ...protocols,
+      QUIC: {
+        "override-destination": false,
+        ...quic,
+        ports: ports.some((port) => String(port) === "443") ? ports : [...ports, 443],
+      },
+    },
+  };
+}
+
 function main(config, profileName) {
   applyDnsOverrides(config);
+  applyQuicSniffing(config);
   return config;
 }

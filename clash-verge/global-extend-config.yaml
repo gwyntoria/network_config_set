@@ -33,7 +33,7 @@ rule-providers:
   Gemini:
     type: http
     behavior: classical
-    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Gemini/Gemini.yaml"
+    url: "https://raw.githubusercontent.com/gwyntoria/network_config_set/refs/heads/main/rules/clash/gemini.yaml"
     path: ./rules/Gemini.yaml
     interval: 86400
 

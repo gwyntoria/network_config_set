@@ -1,0 +1,56 @@
+# NAME: Gemini
+# POLICY: proxy
+# SOURCE: https://github.com/gwyntoria/network_config_set/blob/main/rules/quantumult-x/gemini.list
+# REFERENCE: https://github.com/gwyntoria/network_config_set/blob/main/rules/clash/gemini.yaml
+# UPDATED: 2026-11-25
+# HOST: 25
+# HOST-KEYWORD: 3
+# HOST-SUFFIX: 7
+# TOTAL: 35
+
+# Gemini 网页、Bard 旧入口与静态资源。
+HOST-SUFFIX,gemini.google.com,proxy
+HOST-SUFFIX,bard.google.com,proxy
+HOST,gemini.gstatic.com,proxy
+
+# Google AI Studio、MakerSuite 旧入口与 Gemini Developer API。
+HOST,aistudio.google.com,proxy
+HOST,makersuite.google.com,proxy
+HOST,alkalimakersuite-pa.clients6.google.com,proxy
+HOST,ai.google.dev,proxy
+HOST-KEYWORD,generativelanguage,proxy
+
+# Google AI 相关站点、Colab 与开发者资料。
+HOST-SUFFIX,deepmind.com,proxy
+HOST-SUFFIX,deepmind.google,proxy
+HOST-SUFFIX,generativeai.google,proxy
+HOST-KEYWORD,colab,proxy
+HOST-KEYWORD,developerprofiles,proxy
+
+# Google API、Gemini 相关后端与共享存储（含 Antigravity 安装包）。
+HOST-SUFFIX,apis.google.com,proxy
+HOST-SUFFIX,proactivebackend-pa.googleapis.com,proxy
+HOST,storage.googleapis.com,proxy
+
+# Antigravity 官网、Web 应用、CLI 发布清单和独立 IDE 下载。
+HOST,antigravity.google,proxy
+HOST,antigravity.google.com,proxy
+HOST,antigravity-cli-auto-updater-974169037036.us-central1.run.app,proxy
+HOST,edgedl.me.gvt1.com,proxy
+
+# Antigravity 企业版 API（含区域和 mTLS 端点）。
+HOST,aiplatform.googleapis.com,proxy
+HOST,aiplatform.eu.rep.googleapis.com,proxy
+HOST,aiplatform.mtls.googleapis.com,proxy
+HOST,aiplatform.us.rep.googleapis.com,proxy
+HOST,businessaicode.googleapis.com,proxy
+HOST,businessaicode.eu.rep.googleapis.com,proxy
+HOST,businessaicode.mtls.googleapis.com,proxy
+HOST,businessaicode.us.rep.googleapis.com,proxy
+HOST,cloudcode-pa.googleapis.com,proxy
+HOST,discoveryengine.googleapis.com,proxy
+HOST,discoveryengine.mtls.googleapis.com,proxy
+HOST,eu-discoveryengine.googleapis.com,proxy
+HOST,eu-discoveryengine.mtls.googleapis.com,proxy
+HOST,us-discoveryengine.googleapis.com,proxy
+HOST,us-discoveryengine.mtls.googleapis.com,proxy
