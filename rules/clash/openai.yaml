@@ -8,26 +8,34 @@
 # IP-CIDR: 444
 # TOTAL: 463
 payload:
+  # ChatGPT 和 OpenAI 服务、静态资源与用户内容。
   - DOMAIN-SUFFIX,chatgpt.com
   - DOMAIN-SUFFIX,openai.com
   - DOMAIN-SUFFIX,oaistatic.com
   - DOMAIN-SUFFIX,oaiusercontent.com
-  - DOMAIN-SUFFIX,oaistatsig.com
   - DOMAIN,cdn.openaimerge.com
+
+  # WorkOS 身份认证及相关资源。
   - DOMAIN,cdn.workos.com
-  - DOMAIN,challenges.cloudflare.com
   - DOMAIN,forwarder.workos.com
   - DOMAIN,frontend-apps-multi-region.workos.com
-  - DOMAIN,humb.apple.com
   - DOMAIN,images.workoscdn.com
-  - DOMAIN,js.intercomcdn.com
-  - DOMAIN,js.stripe.com
-  - DOMAIN,o207216.ingest.sentry.io
-  - DOMAIN,o33249.ingest.sentry.io
-  - DOMAIN,rum.browser-intake-datadoghq.com
   - DOMAIN,setup.workos.com
   - DOMAIN,workos.imgix.net
 
+  # Cloudflare 验证、Apple 服务、Intercom 客服与 Stripe 支付。
+  - DOMAIN,challenges.cloudflare.com
+  - DOMAIN,humb.apple.com
+  - DOMAIN,js.intercomcdn.com
+  - DOMAIN,js.stripe.com
+
+  # Statsig 功能配置、Sentry 错误报告与 Datadog 浏览器监控。
+  - DOMAIN-SUFFIX,oaistatsig.com
+  - DOMAIN,o207216.ingest.sentry.io
+  - DOMAIN,o33249.ingest.sentry.io
+  - DOMAIN,rum.browser-intake-datadoghq.com
+
+  # ChatGPT 语音服务主要使用 UDP/3478，网段由官方快照同步。
   # 手动维护时，请把其他规则加在下方的「ChatGPT Voice IP Ranges」标记之前。
   # ChatGPT Voice IP Ranges · https://openai.com/chatgpt-voice.json · 2026-11-24T19:31:46.967853Z
   - IP-CIDR,4.150.48.254/32,no-resolve

@@ -3,28 +3,34 @@
 # REFERENCE: https://help.openai.com/en/articles/9247338-network-recommendations-for-chatgpt-errors-on-web-and-apps
 # UPDATED: 2026-11-25
 
+# ChatGPT 和 OpenAI 服务、静态资源与用户内容。
 HOST-SUFFIX,chatgpt.com,OpenAI
 HOST-SUFFIX,openai.com,OpenAI
 HOST-SUFFIX,oaistatic.com,OpenAI
 HOST-SUFFIX,oaiusercontent.com,OpenAI
-HOST-SUFFIX,oaistatsig.com,OpenAI
 HOST,cdn.openaimerge.com,OpenAI
 
-# 共享服务使用精确域名。
+# WorkOS 身份认证及相关资源。
 HOST,cdn.workos.com,OpenAI
-HOST,challenges.cloudflare.com,OpenAI
 HOST,forwarder.workos.com,OpenAI
 HOST,frontend-apps-multi-region.workos.com,OpenAI
-HOST,humb.apple.com,OpenAI
 HOST,images.workoscdn.com,OpenAI
-HOST,js.intercomcdn.com,OpenAI
-HOST,js.stripe.com,OpenAI
-HOST,o207216.ingest.sentry.io,OpenAI
-HOST,o33249.ingest.sentry.io,OpenAI
-HOST,rum.browser-intake-datadoghq.com,OpenAI
 HOST,setup.workos.com,OpenAI
 HOST,workos.imgix.net,OpenAI
 
+# Cloudflare 验证、Apple 服务、Intercom 客服与 Stripe 支付。
+HOST,challenges.cloudflare.com,OpenAI
+HOST,humb.apple.com,OpenAI
+HOST,js.intercomcdn.com,OpenAI
+HOST,js.stripe.com,OpenAI
+
+# Statsig 功能配置、Sentry 错误报告与 Datadog 浏览器监控。
+HOST-SUFFIX,oaistatsig.com,OpenAI
+HOST,o207216.ingest.sentry.io,OpenAI
+HOST,o33249.ingest.sentry.io,OpenAI
+HOST,rum.browser-intake-datadoghq.com,OpenAI
+
+# ChatGPT 语音服务主要使用 UDP/3478，网段由官方快照同步。
 # 手动维护时，请把其他规则加在下方的「ChatGPT Voice IP Ranges」标记之前。
 # ChatGPT Voice IP Ranges · https://openai.com/chatgpt-voice.json · 2026-11-24T19:31:46.967853Z
 IP-CIDR,4.150.48.254/32,OpenAI
