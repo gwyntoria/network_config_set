@@ -1,6 +1,6 @@
 # NAME: Game
 # POLICY: proxy
-# SOURCE: https://github.com/gwyntoria/network_config_set/blob/main/rules/clash/game-proxy.yaml
+# SOURCE: https://raw.githubusercontent.com/gwyntoria/network_config_set/refs/heads/main/rules/clash/game-proxy.yaml
 # UPDATED: 2026-11-23
 # DOMAIN: 3
 # DOMAIN-SUFFIX: 30

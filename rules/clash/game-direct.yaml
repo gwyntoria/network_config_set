@@ -1,6 +1,6 @@
 # NAME: Game
 # POLICY: direct
-# SOURCE: https://github.com/gwyntoria/network_config_set/blob/main/rules/clash/game-direct.yaml
+# SOURCE: https://raw.githubusercontent.com/gwyntoria/network_config_set/refs/heads/main/rules/clash/game-direct.yaml
 # UPDATED: 2026-11-23
 # DOMAIN: 22
 # DOMAIN-SUFFIX: 25

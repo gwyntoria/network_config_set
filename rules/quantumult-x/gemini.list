@@ -1,6 +1,6 @@
 # NAME: Gemini
 # POLICY: proxy
-# SOURCE: https://github.com/gwyntoria/network_config_set/blob/main/rules/quantumult-x/gemini.list
+# SOURCE: https://raw.githubusercontent.com/gwyntoria/network_config_set/refs/heads/main/rules/quantumult-x/gemini.list
 # REFERENCE: https://github.com/gwyntoria/network_config_set/blob/main/rules/clash/gemini.yaml
 # UPDATED: 2026-11-25
 # HOST: 25

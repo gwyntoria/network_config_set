@@ -1,5 +1,5 @@
 # NAME: Anthropic / Claude
-# SOURCE: https://github.com/gwyntoria/network_config_set/blob/main/rules/quantumult-x/anthropic.list
+# SOURCE: https://raw.githubusercontent.com/gwyntoria/network_config_set/refs/heads/main/rules/quantumult-x/anthropic.list
 # REFERENCE: https://code.claude.com/docs/en/network-config#network-access-requirements
 # REFERENCE: https://code.claude.com/docs/en/desktop#network-access-requirements
 # REFERENCE: https://platform.claude.com/docs/en/api/ip-addresses#inbound-ip-addresses

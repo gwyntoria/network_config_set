@@ -1,6 +1,6 @@
 # NAME: AD
 # POLICY: reject
-# SOURCE: https://github.com/gwyntoria/network_config_set/blob/main/rules/clash/ad.yaml
+# SOURCE: https://raw.githubusercontent.com/gwyntoria/network_config_set/refs/heads/main/rules/clash/ad.yaml
 # REFERENCE: https://raw.githubusercontent.com/earoftoast/clash-rules/main/AD.yaml
 # UPDATED: 2026-11-16
 # DOMAIN-SUFFIX: 567
