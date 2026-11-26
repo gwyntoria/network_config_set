@@ -16,7 +16,8 @@
  * - includedProxyNameRules：订阅节点白名单，匹配方式同上；非空时只保留命中的订阅节点，空数组表示不限制。当前保留香港、美国、日本、韩国和英国节点，黑名单优先于白名单。
  * - regionProxyGroups：美国、日本节点专用代理组，只包含对应地区的订阅节点，手动选择节点。
  * - aiProxyGroup：AI 专用代理组，在当前 profile 的普通代理组和 US、JP 之间手动选择。
- * - aiRuleProviderNames：强制使用 AI 代理组的 rule-provider 名称，必须与合并配置中的名称完全一致。
+ * - geminiProxyGroup：Gemini 专用代理组，选项与 AI 代理组相同。
+ * - aiRuleProviderGroups：AI 相关 rule-provider 按顺序匹配，分别使用指定的代理组。
  * - tiktokProxyGroup：TikTok 专用代理组，选项与 AI 代理组相同。
  * - tiktokRuleProviderNames：强制使用 TikTok 代理组的 rule-provider 名称。
  * - youtubeProxyGroup：YouTube 专用代理组，选项为当前主代理组及可用的 US、JP。
@@ -26,7 +27,7 @@
  * - proxyRuleProviderNames：使用当前 profile 代理策略的 rule-provider 名称。
  *
  * 规则顺序为 directRuleProviderNames、rejectRuleProviderNames、
- * aiRuleProviderNames、tiktokRuleProviderNames、youtubeRuleProviderNames、proxyRuleProviderNames、订阅原规则，
+ * aiRuleProviderGroups、tiktokRuleProviderNames、youtubeRuleProviderNames、proxyRuleProviderNames、订阅原规则，
  * Mihomo 按首条匹配规则执行。脚本只筛选和排序代理组中的真实订阅节点引用，不删除 config.proxies 中的节点定义，
  * 外部节点由内核按脚本生成的 filter 筛选，来源前缀不参与节点名称匹配。
  * DIRECT、REJECT 以及其他代理组引用会保留在原位置。上述列表中的 name 仅用于标注，
@@ -117,31 +118,55 @@ const includedProxyNameRules = [
   },
 ];
 
+const proxyGroupIconBaseUrl =
+  "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color";
+
 // 地区手动选择组：regionId 对应 proxyRegions 中的 id，只包含该地区的真实订阅节点。
 const regionProxyGroups = [
-  { name: "US", regionId: "US" },
-  { name: "JP", regionId: "JP" },
+  {
+    name: "🇺🇸 US",
+    regionId: "US",
+    icon: `${proxyGroupIconBaseUrl}/United_States.png`,
+  },
+  {
+    name: "🇯🇵 JP",
+    regionId: "JP",
+    icon: `${proxyGroupIconBaseUrl}/Japan.png`,
+  },
 ];
 
 const aiProxyGroup = {
-  name: "AI",
+  name: "🤖 AI",
   type: "select",
+  icon: `${proxyGroupIconBaseUrl}/AI.png`,
+};
+
+const geminiProxyGroup = {
+  name: "✨ Gemini",
+  type: "select",
+  icon: "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@2.12.0/dark/gemini-color.png",
 };
 
 const tiktokProxyGroup = {
-  name: "TikTok",
+  name: "🎵 TikTok",
   type: "select",
+  icon: `${proxyGroupIconBaseUrl}/TikTok.png`,
 };
 
 const youtubeProxyGroup = {
-  name: "YouTube",
+  name: "▶️ YouTube",
   type: "select",
+  icon: `${proxyGroupIconBaseUrl}/YouTube.png`,
 };
 
 const rejectRuleProviderNames = ["AD"];
 const directRuleProviderNames = ["GameDirect"];
 const proxyRuleProviderNames = ["GameProxy", "PayPal", "Google"];
-const aiRuleProviderNames = ["OpenAI", "Gemini", "Anthropic"];
+const aiRuleProviderGroups = {
+  OpenAI: aiProxyGroup.name,
+  Gemini: geminiProxyGroup.name,
+  Anthropic: aiProxyGroup.name,
+};
 const tiktokRuleProviderNames = ["TikTok"];
 const youtubeRuleProviderNames = ["YouTube"];
 
@@ -154,10 +179,9 @@ function buildProxyGroupRuleProviderRules(config, providerNames, groupName) {
 }
 
 function buildAiProxyRules(config) {
-  return buildProxyGroupRuleProviderRules(
-    config,
-    aiRuleProviderNames,
-    aiProxyGroup.name,
+  return Object.entries(aiRuleProviderGroups).flatMap(
+    ([providerName, groupName]) =>
+      buildProxyGroupRuleProviderRules(config, [providerName], groupName),
   );
 }
 
@@ -499,6 +523,7 @@ function ensureRegionProxyGroups(config, providerNames) {
       ...oldGroup,
       name: regionGroup.name,
       type: "select",
+      icon: oldGroup?.icon || regionGroup.icon,
       proxies: regionProxyNames,
     };
 
@@ -575,6 +600,7 @@ function ensureSelectProxyGroup(config, profileName, definition, warnMessage) {
   const nextGroup = {
     ...oldGroup,
     ...definition,
+    icon: oldGroup?.icon || definition.icon,
     proxies,
   };
 
@@ -695,6 +721,12 @@ function main(config, profileName) {
     profileName,
     aiProxyGroup,
     "[clash-verge] No proxy groups found for AI. AI rules were skipped.",
+  );
+  ensureSelectProxyGroup(
+    config,
+    profileName,
+    geminiProxyGroup,
+    "[clash-verge] No proxy groups found for Gemini. Gemini rules were skipped.",
   );
   filterAndSortProxyGroupProxies(config);
   mergeProxyRules(config, profileName);

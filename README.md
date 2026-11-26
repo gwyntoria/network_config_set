@@ -93,10 +93,11 @@ clash verge rev 的执行顺序为：全局扩展配置 → 全局扩展脚本 �
 - `profilePolicyMap`：profile 名称与代理组名称的对应关系。
 - `proxyPolicyCandidates`：profile 未命中时的代理组候选名称。
 - `proxyRegions`：地区识别和排列顺序，匹配的节点优先排列，其余节点保留原有顺序。
-- `regionProxyGroups`：地区策略组定义，组名与 `proxyRegions` 中的地区 id 对应。
+- `regionProxyGroups`：地区策略组定义，`regionId` 对应 `proxyRegions` 中的地区 id，`name` 可带 emoji。
 - `excludedProxyNameRules`：节点名称黑名单。
 - `includedProxyNameRules`：节点名称白名单。非空时只保留命中的订阅节点；黑名单优先，空数组表示不限制。
-- `aiRuleProviderNames`、`tiktokRuleProviderNames`、`rejectRuleProviderNames`、`directRuleProviderNames` 与 `proxyRuleProviderNames`：provider 的分流策略。
+- `aiRuleProviderGroups`：按顺序指定 AI 相关 provider 的策略组，OpenAI 和 Anthropic 使用 `🤖 AI`，Gemini 使用 `✨ Gemini`。
+- `tiktokRuleProviderNames`、`rejectRuleProviderNames`、`directRuleProviderNames` 与 `proxyRuleProviderNames`：对应 provider 的分流策略。
 
 脚本插入规则时采用以下顺序：
 
