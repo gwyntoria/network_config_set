@@ -55,10 +55,10 @@ const proxyPolicyCandidates = [
 // 节点只归入第一个命中的地区；数组顺序同时决定 proxy group 中的地区优先级。
 const proxyRegions = [
   {
-    id: "HK",
-    name: "香港",
-    keywords: ["香港", "Hong Kong", "🇭🇰"],
-    codes: ["HK"],
+    id: "US",
+    name: "美国",
+    keywords: ["美国", "美國", "United States", "America", "🇺🇸"],
+    codes: ["US", "USA"],
   },
   {
     id: "JP",
@@ -71,18 +71,6 @@ const proxyRegions = [
     name: "韩国",
     keywords: ["韩国", "韓國", "South Korea", "Korea", "Seoul", "🇰🇷"],
     codes: ["KR"],
-  },
-  {
-    id: "US",
-    name: "美国",
-    keywords: ["美国", "美國", "United States", "America", "🇺🇸"],
-    codes: ["US", "USA"],
-  },
-  {
-    id: "SG",
-    name: "新加坡",
-    keywords: ["新加坡", "Singapore", "狮城", "🇸🇬"],
-    codes: ["SG"],
   },
 ];
 
@@ -127,11 +115,6 @@ const includedProxyNameRules = [
     keywords: ["新加坡", "Singapore", "狮城", "🇸🇬"],
     codes: ["SG"],
   },
-  // {
-  //   name: "台湾",
-  //   keywords: ["台湾", "台灣", "Taiwan", "Taipei", "🇹🇼"],
-  //   codes: ["TW"],
-  // },
 ];
 
 // 地区手动选择组：regionId 对应 proxyRegions 中的 id，只包含该地区的真实订阅节点。
