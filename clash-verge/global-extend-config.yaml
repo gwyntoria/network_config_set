@@ -58,6 +58,13 @@ rule-providers:
     path: ./rules/YouTube.yaml
     interval: 86400
 
+  Google:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/gwyntoria/network_config_set/refs/heads/main/rules/clash/google.yaml"
+    path: ./rules/Google.yaml
+    interval: 86400
+
   PayPal:
     type: http
     behavior: classical

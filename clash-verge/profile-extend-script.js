@@ -140,7 +140,7 @@ const youtubeProxyGroup = {
 
 const rejectRuleProviderNames = ["AD"];
 const directRuleProviderNames = ["GameDirect"];
-const proxyRuleProviderNames = ["GameProxy", "PayPal"];
+const proxyRuleProviderNames = ["GameProxy", "PayPal", "Google"];
 const aiRuleProviderNames = ["OpenAI", "Gemini", "Anthropic"];
 const tiktokRuleProviderNames = ["TikTok"];
 const youtubeRuleProviderNames = ["YouTube"];
