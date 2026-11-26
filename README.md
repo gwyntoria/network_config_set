@@ -96,7 +96,8 @@ clash verge rev 的执行顺序为：全局扩展配置 → 全局扩展脚本 �
 - `regionProxyGroups`：地区策略组定义，`regionId` 对应 `proxyRegions` 中的地区 id，`name` 可带 emoji。
 - `excludedProxyNameRules`：节点名称黑名单。
 - `includedProxyNameRules`：节点名称白名单。非空时只保留命中的订阅节点；黑名单优先，空数组表示不限制。
-- `aiRuleProviderGroups`：按顺序指定 AI 相关 provider 的策略组，OpenAI 和 Anthropic 使用 `🤖 AI`，Gemini 使用 `✨ Gemini`。
+- `aiRuleProviderNames`：OpenAI 和 Anthropic 使用 `🤖 AI`。
+- `googleProxyGroup`：YouTube、Gemini 和通用 Google 规则共用 `🌐 Google`，可选择当前主代理组及可用的 `🇺🇸 US`、`🇯🇵 JP`。
 - `tiktokRuleProviderNames`、`rejectRuleProviderNames`、`directRuleProviderNames` 与 `proxyRuleProviderNames`：对应 provider 的分流策略。
 
 脚本插入规则时采用以下顺序：
@@ -104,11 +105,11 @@ clash verge rev 的执行顺序为：全局扩展配置 → 全局扩展脚本 �
 ```text
 直连 provider 规则
 广告拦截规则
-AI 规则
+AI 规则（OpenAI → Anthropic）
 TikTok 规则
-...
-...
-代理 provider 规则
+Google 服务规则（YouTube → Gemini）
+代理 provider 规则（GameProxy → PayPal）
+通用 Google 规则
 订阅原有规则
 ```
 

@@ -16,18 +16,18 @@
  * - includedProxyNameRules：订阅节点白名单，匹配方式同上；非空时只保留命中的订阅节点，空数组表示不限制。当前保留香港、美国、日本、韩国和英国节点，黑名单优先于白名单。
  * - regionProxyGroups：美国、日本节点专用代理组，只包含对应地区的订阅节点，手动选择节点。
  * - aiProxyGroup：AI 专用代理组，在当前 profile 的普通代理组和 US、JP 之间手动选择。
- * - geminiProxyGroup：Gemini 专用代理组，选项与 AI 代理组相同。
- * - aiRuleProviderGroups：AI 相关 rule-provider 按顺序匹配，分别使用指定的代理组。
+ * - aiRuleProviderNames：使用 AI 代理组的 rule-provider 名称。
  * - tiktokProxyGroup：TikTok 专用代理组，选项与 AI 代理组相同。
  * - tiktokRuleProviderNames：强制使用 TikTok 代理组的 rule-provider 名称。
- * - youtubeProxyGroup：YouTube 专用代理组，选项为当前主代理组及可用的 US、JP。
- * - youtubeRuleProviderNames：强制使用 YouTube 代理组的 rule-provider 名称。
+ * - googleProxyGroup：YouTube、Gemini 和 Google 共用的代理组，选项与 AI 代理组相同。
+ * - googleServiceRuleProviderNames：优先于通用 Google 规则匹配的 Google 服务规则集。
  * - rejectRuleProviderNames：使用 REJECT 策略的 rule-provider 名称。
  * - directRuleProviderNames：使用 DIRECT 策略的 rule-provider 名称。
  * - proxyRuleProviderNames：使用当前 profile 代理策略的 rule-provider 名称。
  *
  * 规则顺序为 directRuleProviderNames、rejectRuleProviderNames、
- * aiRuleProviderGroups、tiktokRuleProviderNames、youtubeRuleProviderNames、proxyRuleProviderNames、订阅原规则，
+ * aiRuleProviderNames、tiktokRuleProviderNames、googleServiceRuleProviderNames、
+ * proxyRuleProviderNames、通用 Google 规则、订阅原规则，
  * Mihomo 按首条匹配规则执行。脚本只筛选和排序代理组中的真实订阅节点引用，不删除 config.proxies 中的节点定义，
  * 外部节点由内核按脚本生成的 filter 筛选，来源前缀不参与节点名称匹配。
  * DIRECT、REJECT 以及其他代理组引用会保留在原位置。上述列表中的 name 仅用于标注，
@@ -141,34 +141,24 @@ const aiProxyGroup = {
   icon: `${proxyGroupIconBaseUrl}/AI.png`,
 };
 
-const geminiProxyGroup = {
-  name: "✨ Gemini",
-  type: "select",
-  icon: "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@2.12.0/dark/gemini-color.png",
-};
-
 const tiktokProxyGroup = {
   name: "🎵 TikTok",
   type: "select",
   icon: `${proxyGroupIconBaseUrl}/TikTok.png`,
 };
 
-const youtubeProxyGroup = {
-  name: "▶️ YouTube",
+const googleProxyGroup = {
+  name: "🌐 Google",
   type: "select",
-  icon: `${proxyGroupIconBaseUrl}/YouTube.png`,
+  icon: `${proxyGroupIconBaseUrl}/Google.png`,
 };
 
 const rejectRuleProviderNames = ["AD"];
 const directRuleProviderNames = ["GameDirect"];
-const proxyRuleProviderNames = ["GameProxy", "PayPal", "Google"];
-const aiRuleProviderGroups = {
-  OpenAI: aiProxyGroup.name,
-  Gemini: geminiProxyGroup.name,
-  Anthropic: aiProxyGroup.name,
-};
+const proxyRuleProviderNames = ["GameProxy", "PayPal"];
+const aiRuleProviderNames = ["OpenAI", "Anthropic"];
 const tiktokRuleProviderNames = ["TikTok"];
-const youtubeRuleProviderNames = ["YouTube"];
+const googleServiceRuleProviderNames = ["YouTube", "Gemini"];
 
 function buildProxyGroupRuleProviderRules(config, providerNames, groupName) {
   if (!getProxyGroupNames(config).includes(groupName)) return [];
@@ -179,9 +169,10 @@ function buildProxyGroupRuleProviderRules(config, providerNames, groupName) {
 }
 
 function buildAiProxyRules(config) {
-  return Object.entries(aiRuleProviderGroups).flatMap(
-    ([providerName, groupName]) =>
-      buildProxyGroupRuleProviderRules(config, [providerName], groupName),
+  return buildProxyGroupRuleProviderRules(
+    config,
+    aiRuleProviderNames,
+    aiProxyGroup.name,
   );
 }
 
@@ -193,11 +184,11 @@ function buildTikTokProxyRules(config) {
   );
 }
 
-function buildYouTubeProxyRules(config) {
+function buildGoogleServiceProxyRules(config) {
   return buildProxyGroupRuleProviderRules(
     config,
-    youtubeRuleProviderNames,
-    youtubeProxyGroup.name,
+    googleServiceRuleProviderNames,
+    googleProxyGroup.name,
   );
 }
 
@@ -292,8 +283,11 @@ function mergeProxyRules(config, profileName) {
       .concat(buildRejectRules())
       .concat(buildAiProxyRules(config))
       .concat(buildTikTokProxyRules(config))
-      .concat(buildYouTubeProxyRules(config))
+      .concat(buildGoogleServiceProxyRules(config))
       .concat(buildProxyRuleProviderRules(proxyPolicy))
+      .concat(
+        buildProxyGroupRuleProviderRules(config, ["Google"], googleProxyGroup.name),
+      )
       .concat(oldRules),
   );
 }
@@ -713,20 +707,14 @@ function main(config, profileName) {
   ensureSelectProxyGroup(
     config,
     profileName,
-    youtubeProxyGroup,
-    "[clash-verge] No proxy groups found for YouTube. YouTube rules were skipped.",
-  );
-  ensureSelectProxyGroup(
-    config,
-    profileName,
     aiProxyGroup,
     "[clash-verge] No proxy groups found for AI. AI rules were skipped.",
   );
   ensureSelectProxyGroup(
     config,
     profileName,
-    geminiProxyGroup,
-    "[clash-verge] No proxy groups found for Gemini. Gemini rules were skipped.",
+    googleProxyGroup,
+    "[clash-verge] No proxy groups found for Google. Google rules were skipped.",
   );
   filterAndSortProxyGroupProxies(config);
   mergeProxyRules(config, profileName);
