@@ -1,11 +1,15 @@
 # NAME: Game
 # POLICY: proxy
 # SOURCE: https://raw.githubusercontent.com/gwyntoria/network_config_set/refs/heads/main/rules/clash/game-proxy.yaml
-# UPDATED: 2026-11-26
+# UPDATED: 2026-11-28
 # DOMAIN: 10
-# DOMAIN-SUFFIX: 32
-# TOTAL: 42
+# DOMAIN-SUFFIX: 34
+# TOTAL: 44
 payload:
+  # Steam - 旧下载协商主机（实测直连两轮 TLS 握手均失败，走代理可用）
+  - DOMAIN-SUFFIX,cdn.steampowered.com
+  - DOMAIN-SUFFIX,client-download.steampowered.com
+
   # Steam - Store & Web
   - DOMAIN-SUFFIX,s.team
   - DOMAIN-SUFFIX,steamdeck.com

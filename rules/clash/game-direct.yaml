@@ -1,25 +1,24 @@
 # NAME: Game
 # POLICY: direct
 # SOURCE: https://raw.githubusercontent.com/gwyntoria/network_config_set/refs/heads/main/rules/clash/game-direct.yaml
-# UPDATED: 2026-11-26
-# DOMAIN: 15
-# DOMAIN-SUFFIX: 23
+# UPDATED: 2026-11-28
+# DOMAIN: 14
+# DOMAIN-SUFFIX: 22
 # DOMAIN-REGEX: 2
-# TOTAL: 40
+# TOTAL: 38
 payload:
   # Steam China - Platform
   - DOMAIN-SUFFIX,steamchina.com
 
   # Steam China - Download CDN（实测直连 17-26ms，代理 86-783ms）
-  - DOMAIN,dl.steam.clngaa.com
+  # clngaa 会把分片请求 302 到 dl1.steam.clngaa.com，用后缀覆盖整站
+  - DOMAIN-SUFFIX,steam.clngaa.com
   - DOMAIN,st.dl.bscstorage.net
   - DOMAIN,st.dl.eccdnx.com
   - DOMAIN,xz.pphimalayanrt.com
 
   # Steam - 下载协商与控制通道（api 决定下发哪套内容服务器，必须直连）
   - DOMAIN-SUFFIX,api.steampowered.com
-  - DOMAIN-SUFFIX,cdn.steampowered.com
-  - DOMAIN-SUFFIX,client-download.steampowered.com
   - DOMAIN-SUFFIX,media.steampowered.com
 
   # Steam - 内容 CDN（国内内容服务器）

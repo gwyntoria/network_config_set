@@ -1,20 +1,19 @@
 # NAME: Game
 # SOURCE: https://raw.githubusercontent.com/gwyntoria/network_config_set/refs/heads/main/rules/quantumult-x/game.list
-# UPDATED: 2026-11-26
+# UPDATED: 2026-11-28
 
 # Steam China - Platform
 HOST-SUFFIX,steamchina.com,direct
 
 # Steam China - Download CDN（实测直连 17-26ms，代理 86-783ms）
-HOST,dl.steam.clngaa.com,direct
+# clngaa 会把分片请求 302 到 dl1.steam.clngaa.com，用后缀覆盖整站
+HOST-SUFFIX,steam.clngaa.com,direct
 HOST,st.dl.bscstorage.net,direct
 HOST,st.dl.eccdnx.com,direct
 HOST,xz.pphimalayanrt.com,direct
 
 # Steam - 下载协商与控制通道（api 决定下发哪套内容服务器，必须直连）
 HOST-SUFFIX,api.steampowered.com,direct
-HOST-SUFFIX,cdn.steampowered.com,direct
-HOST-SUFFIX,client-download.steampowered.com,direct
 HOST-SUFFIX,media.steampowered.com,direct
 
 # Steam - 内容 CDN（国内内容服务器）
@@ -71,6 +70,10 @@ HOST,uplaypc-s-ubisoft.cdn.ubi.com,direct
 
 # PlayStation - Download CDN
 HOST-SUFFIX,dl.playstation.net,direct
+
+# Steam - 旧下载协商主机（实测直连两轮 TLS 握手均失败，走代理可用）
+HOST-SUFFIX,cdn.steampowered.com,proxy
+HOST-SUFFIX,client-download.steampowered.com,proxy
 
 # Steam - Store & Web
 HOST-SUFFIX,s.team,proxy
